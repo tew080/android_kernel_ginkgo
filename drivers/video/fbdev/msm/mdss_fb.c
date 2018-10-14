@@ -91,7 +91,7 @@ static void drm_kick_frame_boost(int timeout_ms)
 	if (!timeout_ms)
 		return;
 	if (timeout_ms < 0) {
-		devfreq_boost_kick(DEVFREQ_CPU_DDR_BW);
+		devfreq_boost_kick(DEVFREQ_MSM_CPUBW);
 	}
 }
 
@@ -4929,7 +4929,7 @@ int mdss_fb_do_ioctl(struct fb_info *info, unsigned int cmd,
 		ret = mdss_fb_mode_switch(mfd, dsi_mode);
 		break;
 	case MSMFB_ATOMIC_COMMIT:
-		drm_kick_frame_boost(DEVFREQ_CPU_DDR_BW);
+		drm_kick_frame_boost(DEVFREQ_MSM_CPUBW);
 		ret = mdss_fb_atomic_commit_ioctl(info, argp, file);
 		break;
 
