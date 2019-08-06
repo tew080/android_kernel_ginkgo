@@ -686,6 +686,10 @@ ifneq ($(findstring llvm-ar,$(AR)),)
 LLVM_AR		:= $(AR)
 else
 LLVM_AR		:= llvm-ar
+
+# Set O3 optimization level for LTO
+LDFLAGS		+= --plugin-opt=O3
+
 endif
 
 ifneq ($(findstring llvm-nm,$(NM)),)
