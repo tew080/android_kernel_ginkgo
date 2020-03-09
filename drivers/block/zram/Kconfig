@@ -67,3 +67,8 @@ config ZRAM_DEFAULT_BACKEND
 	default "zbud" if DEFAULT_ZRAM_ZBUD
 	default "z3fold" if DEFAULT_ZRAM_Z3FOLD
 	default "zsmalloc"
+	
+config ZRAM_SIZE_OVERRIDE
+	int "zram size to set from kernel"
+	range 1 8
+	default 2
