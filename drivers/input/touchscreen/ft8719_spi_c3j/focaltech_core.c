@@ -1545,7 +1545,7 @@ static int fts_ts_probe_entry(struct spi_device *client, struct fts_ts_data *ts_
 		goto err_get_regulator;
 	}
 
-	ret = fts_ts_enable_regulator(false);//default disable regulator
+	ret = fts_ts_enable_regulator(true);
 	if (ret < 0) {
 		FTS_ERROR("Failed to enable regulator");
 		goto err_enable_regulator;
