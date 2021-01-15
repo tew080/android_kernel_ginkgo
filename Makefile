@@ -720,19 +720,6 @@ KBUILD_CFLAGS += -mllvm -enable-post-misched
 KBUILD_CFLAGS += -fno-stack-protector         
 KBUILD_CFLAGS += -fno-asynchronous-unwind-tables
 
-# Inlin optimization
-KBUILD_CFLAGS += -finline-functions -mllvm -enable-pipeliner \
-		-mllvm -enable-loop-distribute \
-		-mllvm -enable-loopinterchange \
-		-mllvm -enable-machine-outliner=never
-
-KBUILD_CFLAGS += -mllvm -inline-threshold=850 \
-		-mllvm -inlinehint-threshold=550 \
-		-mllvm -unroll-runtime \
-		-mllvm -unroll-count=4 \
-		-mllvm -unroll-threshold=900 \
-		-mllvm -unroll-partial-threshold=900
-
 # Increase the speed of mathematical calculations
 KBUILD_CFLAGS += -ffp-contract=fast -ffast-math \
 		-fno-trapping-math -fno-math-errno \
@@ -821,6 +808,22 @@ KBUILD_CFLAGS	+=	-fprofile-use \
 			-fprofile-partial-training \
 			-Wno-error=coverage-mismatch
 endif
+
+ifdef CONFIG_INLINE_OPTIMIZATION
+# Inlin optimization
+KBUILD_CFLAGS += -finline-functions -mllvm -enable-pipeliner \
+		-mllvm -enable-loop-distribute \
+		-mllvm -enable-loopinterchange \
+		-mllvm -enable-machine-outliner=never
+
+KBUILD_CFLAGS += -mllvm -inline-threshold=850 \
+		-mllvm -inlinehint-threshold=550 \
+		-mllvm -unroll-runtime \
+		-mllvm -unroll-count=4 \
+		-mllvm -unroll-threshold=900 \
+		-mllvm -unroll-partial-threshold=900
+endif
+
 endif
 
 # Tell gcc to never replace conditional load with a non-conditional one
