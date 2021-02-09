@@ -267,6 +267,9 @@ static void sugov_get_util(unsigned long *util, unsigned long *max, int cpu,
 
 	*util = boosted_cpu_util(cpu, &loadcpu->walt_load);
 
+#ifdef CONFIG_UCLAMP_TASK
+	*util = uclamp_util_with(rq, *util, NULL);
+#endif
 	if (use_pelt()) {
 		sched_avg_update(rq);
 		delta = time - rq->age_stamp;
