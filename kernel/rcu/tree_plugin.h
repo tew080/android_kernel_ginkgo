@@ -2197,7 +2197,7 @@ static void rcu_spawn_one_nocb_kthread(int cpu)
 	}
 
 	/* Spawn the kthread for this CPU. */
-	t = kthread_run(rcu_nocb_kthread, rdp_spawn,
+	t = kthread_run_perf_critical(cpu_lp_mask,rcu_nocb_kthread, rdp_spawn,
 			"rcuo%c/%d", rcu_state.abbr, cpu);
 	if (WARN_ONCE(IS_ERR(t), "%s: Could not start rcuo kthread, OOM is now expected behavior\n", __func__))
 		return;
