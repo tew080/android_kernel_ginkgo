@@ -58,15 +58,38 @@ static struct boost_drv boost_drv_g __read_mostly = {
 	.boost_waitq = __WAIT_QUEUE_HEAD_INITIALIZER(boost_drv_g.boost_waitq)
 };
 
-static unsigned int get_input_boost_freq(struct cpufreq_policy *policy,
-					 struct boost_drv *b)
+static inline unsigned int get_input_boost_freq(struct cpufreq_policy *policy)
 {
 	unsigned int freq;
 
 	if (cpumask_test_cpu(policy->cpu, cpu_lp_mask))
-		freq = max(input_boost_freq_lp, b->min_freq_lp);
+		freq = input_boost_freq_lp;
 	else
-		freq = max(input_boost_freq_hp, b->min_freq_perf);
+		freq = input_boost_freq_hp;
+
+	return min(freq, policy->max);
+}
+
+static inline unsigned int get_min_freq(struct cpufreq_policy *policy)
+{
+	unsigned int freq;
+
+	if (cpumask_test_cpu(policy->cpu, cpu_lp_mask))
+		freq = CONFIG_MIN_FREQ_LP;
+	else
+		freq = CONFIG_MIN_FREQ_PERF;
+
+	return max(freq, policy->min);
+}
+
+static  inline unsigned int get_max_boost_freq(struct cpufreq_policy *policy)
+{
+	unsigned int freq;
+
+	if (cpumask_test_cpu(policy->cpu, cpu_lp_mask))
+		freq = CONFIG_MAX_BOOST_FREQ_LP;
+	else
+		freq = CONFIG_MAX_BOOST_FREQ_PERF;
 
 	return min(freq, policy->max);
 }
@@ -226,15 +249,13 @@ static int cpu_notifier_cb(struct notifier_block *nb, unsigned long action,
 	}
 
 	/*
-	 * Boost to policy->max if the boost frequency is higher. When unboosting,
-	 * set policy->min to the previously saved min_freq of the CPU.
+	 * Boost to policy->max if the boost frequency is higher. When
+	 * unboosting, set policy->min to the absolute min freq for the CPU.
 	 */
 	if (test_bit(INPUT_BOOST, &b->state))
-		policy->min = get_input_boost_freq(policy, b);
-	else if (cpumask_test_cpu(policy->cpu, cpu_lp_mask))
-		policy->min = b->min_freq_lp;
+		policy->min = get_input_boost_freq(policy);
 	else
-		policy->min = b->min_freq_perf;
+		policy->min = get_min_freq(policy);
 
 	return NOTIFY_OK;
 }
