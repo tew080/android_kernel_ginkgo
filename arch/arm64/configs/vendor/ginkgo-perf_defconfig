@@ -5922,3 +5922,13 @@ CONFIG_LRU_GEN_ENABLED=y
 ######
 ## end LRU (Least Recently Used memory management mechanism)
 ######
+
+######
+## Sysctl knobs for protecting the working set
+######
+CONFIG_ANON_MIN_KBYTES=32768
+CONFIG_CLEAN_LOW_KBYTES=65536
+CONFIG_CLEAN_MIN_KBYTES=16384
+######
+## end of  Sysctl knobs for protecting the working set
+######
