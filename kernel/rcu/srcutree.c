@@ -531,7 +531,6 @@ static void srcu_gp_end(struct srcu_struct *ssp)
 	unsigned long flags;
 	unsigned long gpseq;
 	int idx;
-	int idxnext;
 	unsigned long mask;
 	struct srcu_data *sdp;
 	struct srcu_node *snp;
@@ -544,7 +543,7 @@ static void srcu_gp_end(struct srcu_struct *ssp)
 	idx = rcu_seq_state(ssp->srcu_gp_seq);
 	WARN_ON_ONCE(idx != SRCU_STATE_SCAN2);
 	cbdelay = srcu_get_delay(ssp);
-	ssp->srcu_last_gp_end = ktime_get_mono_fast_ns();
+	WRITE_ONCE(ssp->srcu_last_gp_end, ktime_get_mono_fast_ns());
 	rcu_seq_end(&ssp->srcu_gp_seq);
 	gpseq = rcu_seq_current(&ssp->srcu_gp_seq);
 	if (ULONG_CMP_LT(ssp->srcu_gp_seq_needed_exp, gpseq))
@@ -555,7 +554,6 @@ static void srcu_gp_end(struct srcu_struct *ssp)
 
 	/* Initiate callback invocation as needed. */
 	idx = rcu_seq_ctr(gpseq) % ARRAY_SIZE(snp->srcu_have_cbs);
-	idxnext = (idx + 1) % ARRAY_SIZE(snp->srcu_have_cbs);
 	srcu_for_each_node_breadth_first(ssp, snp) {
 		spin_lock_irq_rcu_node(snp);
 		cbs = false;
@@ -777,6 +775,7 @@ static bool srcu_might_be_idle(struct srcu_struct *ssp)
 	unsigned long flags;
 	struct srcu_data *sdp;
 	unsigned long t;
+	unsigned long tlast;
 
 	/* If the local srcu_data structure has callbacks, not idle.  */
 	local_irq_save(flags);
@@ -795,9 +794,9 @@ static bool srcu_might_be_idle(struct srcu_struct *ssp)
 
 	/* First, see if enough time has passed since the last GP. */
 	t = ktime_get_mono_fast_ns();
+	tlast = READ_ONCE(ssp->srcu_last_gp_end);
 	if (exp_holdoff == 0 ||
-	    time_in_range_open(t, ssp->srcu_last_gp_end,
-			       ssp->srcu_last_gp_end + exp_holdoff))
+	    time_in_range_open(t, tlast, tlast + exp_holdoff))
 		return false; /* Too soon after last GP. */
 
 	/* Next, check for probable idleness. */
@@ -846,8 +845,8 @@ static void srcu_leak_callback(struct rcu_head *rhp)
  * srcu_read_lock(), and srcu_read_unlock() that are all passed the same
  * srcu_struct structure.
  */
-void __call_srcu(struct srcu_struct *ssp, struct rcu_head *rhp,
-		 rcu_callback_t func, bool do_norm)
+static void __call_srcu(struct srcu_struct *ssp, struct rcu_head *rhp,
+			rcu_callback_t func, bool do_norm)
 {
 	unsigned long flags;
 	int idx;
@@ -1294,8 +1293,9 @@ void srcu_torture_stats_print(struct srcu_struct *ssp, char *tt, char *tf)
 
 		c0 = l0 - u0;
 		c1 = l1 - u1;
-		pr_cont(" %d(%ld,%ld %1p)",
-			cpu, c0, c1, rcu_segcblist_head(&sdp->srcu_cblist));
+		pr_cont(" %d(%ld,%ld %c)",
+			cpu, c0, c1,
+			"C."[rcu_segcblist_empty(&sdp->srcu_cblist)]);
 		s0 += c0;
 		s1 += c1;
 	}
@@ -1325,3 +1325,68 @@ void __init srcu_init(void)
 		queue_work(rcu_gp_wq, &ssp->work.work);
 	}
 }
+
+#ifdef CONFIG_MODULES
+
+/* Initialize any global-scope srcu_struct structures used by this module. */
+static int srcu_module_coming(struct module *mod)
+{
+	int i;
+	struct srcu_struct **sspp = mod->srcu_struct_ptrs;
+	int ret;
+
+	for (i = 0; i < mod->num_srcu_structs; i++) {
+		ret = init_srcu_struct(*(sspp++));
+		if (WARN_ON_ONCE(ret))
+			return ret;
+	}
+	return 0;
+}
+
+/* Clean up any global-scope srcu_struct structures used by this module. */
+static void srcu_module_going(struct module *mod)
+{
+	int i;
+	struct srcu_struct **sspp = mod->srcu_struct_ptrs;
+
+	for (i = 0; i < mod->num_srcu_structs; i++)
+		cleanup_srcu_struct(*(sspp++));
+}
+
+/* Handle one module, either coming or going. */
+static int srcu_module_notify(struct notifier_block *self,
+			      unsigned long val, void *data)
+{
+	struct module *mod = data;
+	int ret = 0;
+
+	switch (val) {
+	case MODULE_STATE_COMING:
+		ret = srcu_module_coming(mod);
+		break;
+	case MODULE_STATE_GOING:
+		srcu_module_going(mod);
+		break;
+	default:
+		break;
+	}
+	return ret;
+}
+
+static struct notifier_block srcu_module_nb = {
+	.notifier_call = srcu_module_notify,
+	.priority = 0,
+};
+
+static __init int init_srcu_module_notifier(void)
+{
+	int ret;
+
+	ret = register_module_notifier(&srcu_module_nb);
+	if (ret)
+		pr_warn("Failed to register srcu module notifier\n");
+	return ret;
+}
+late_initcall(init_srcu_module_notifier);
+
+#endif /* #ifdef CONFIG_MODULES */

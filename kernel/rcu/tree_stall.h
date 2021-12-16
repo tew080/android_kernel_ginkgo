@@ -527,6 +527,8 @@ static void check_cpu_stall(struct rcu_data *rdp)
 
 		/* We haven't checked in, so go dump stack. */
 		print_cpu_stall();
+		if (rcu_cpu_stall_ftrace_dump)
+			rcu_ftrace_dump(DUMP_ALL);
 
 	} else if (rcu_gp_in_progress() &&
 		   ULONG_CMP_GE(j, js + RCU_STALL_RAT_DELAY) &&
@@ -534,6 +536,8 @@ static void check_cpu_stall(struct rcu_data *rdp)
 
 		/* They had a few time units to dump stack, so complain. */
 		print_other_cpu_stall(gs2);
+		if (rcu_cpu_stall_ftrace_dump)
+			rcu_ftrace_dump(DUMP_ALL);
 	}
 }
 
@@ -585,6 +589,11 @@ void show_rcu_gp_kthreads(void)
 				cpu, (long)rdp->gp_seq_needed);
 		}
 	}
+	for_each_possible_cpu(cpu) {
+		rdp = per_cpu_ptr(&rcu_data, cpu);
+		if (rcu_segcblist_is_offloaded(&rdp->cblist))
+			show_rcu_nocb_state(rdp);
+	}
 	/* sched_show_task(rcu_state.gp_kthread); */
 }
 EXPORT_SYMBOL_GPL(show_rcu_gp_kthreads);
@@ -630,7 +639,9 @@ static void rcu_check_gp_start_stall(struct rcu_node *rnp, struct rcu_data *rdp,
 	    time_before(j, rcu_state.gp_req_activity + gpssdelay) ||
 	    time_before(j, rcu_state.gp_activity + gpssdelay) ||
 	    atomic_xchg(&warned, 1)) {
-		raw_spin_unlock_rcu_node(rnp_root); /* irqs remain disabled. */
+		if (rnp_root != rnp)
+			/* irqs remain disabled. */
+			raw_spin_unlock_rcu_node(rnp_root);
 		raw_spin_unlock_irqrestore_rcu_node(rnp, flags);
 		return;
 	}
