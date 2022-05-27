@@ -811,17 +811,20 @@ endif
 
 ifdef CONFIG_INLINE_OPTIMIZATION
 # Inlin optimization
-KBUILD_CFLAGS += -finline-functions -mllvm -enable-pipeliner \
+INLINE_FLAGS += -finline-functions -mllvm -enable-pipeliner \
 		-mllvm -enable-loop-distribute \
 		-mllvm -enable-loopinterchange \
-		-mllvm -enable-machine-outliner=never
-
-KBUILD_CFLAGS += -mllvm -inline-threshold=850 \
+		-mllvm -enable-machine-outliner=never \
+		-mllvm -inline-threshold=850 \
 		-mllvm -inlinehint-threshold=550 \
 		-mllvm -unroll-runtime \
 		-mllvm -unroll-count=4 \
 		-mllvm -unroll-threshold=900 \
 		-mllvm -unroll-partial-threshold=900
+
+KBUILD_CFLAGS += $(INLINE_FLAGS)
+KBUILD_AFLAGS += $(INLINE_FLAGS)
+KBUILD_LDFLAGS += $(INLINE_FLAGS)
 endif
 
 endif
