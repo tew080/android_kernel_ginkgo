@@ -665,8 +665,12 @@ all: vmlinux
 
 KBUILD_CFLAGS	+= $(call cc-option,-fno-PIE)
 KBUILD_AFLAGS	+= $(call cc-option,-fno-PIE)
-CFLAGS_GCOV	:= -fprofile-arcs -ftest-coverage \
-	$(call cc-option,-fno-tree-loop-im) \
+ifeq ($(CONFIG_PGO_GEN),y)
+CFLAGS_GCOV := -fprofile-generate
+else
+CFLAGS_GCOV := --coverage
+endif
+CFLAGS_GCOV += $(call cc-option,-fno-tree-loop-im) \
 	$(call cc-disable-warning,maybe-uninitialized,)
 export CFLAGS_GCOV
 
@@ -797,6 +801,14 @@ ifdef CONFIG_LD_DEAD_CODE_DATA_ELIMINATION
 KBUILD_CFLAGS	+= -mllvm -polly-run-dce
 endif
 endif # CONFIG_LLVM_POLLY
+
+# Use generated profiles from profiling with CONFIG_PGO_GEN to optimize the kernel
+ifeq ($(CONFIG_PGO_USE),y)
+KBUILD_CFLAGS	+=	-fprofile-use \
+			-fprofile-correction \
+			-fprofile-partial-training \
+			-Wno-error=coverage-mismatch
+endif
 
 # Tell gcc to never replace conditional load with a non-conditional one
 KBUILD_CFLAGS	+= $(call cc-option,--param=allow-store-data-races=0)
