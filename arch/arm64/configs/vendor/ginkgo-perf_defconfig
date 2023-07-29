@@ -5954,3 +5954,11 @@ CONFIG_ZRAM_ENTROPY=y
 ######
 ## end of Use entropy optimization for zram
 ######
+
+#####
+## High performance booster in filesystem
+######
+CONFIG_FS_HPB=y
+######
+## end High performance booster in filesystem
+######

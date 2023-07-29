@@ -41,6 +41,11 @@
 #endif
 
 #define __FS_HAS_ENCRYPTION IS_ENABLED(CONFIG_EXT4_FS_ENCRYPTION)
+
+#ifdef CONFIG_FS_HPB
+#include <linux/fs_hpb.h>
+#endif
+
 #include <linux/fscrypt.h>
 
 /*
@@ -1591,6 +1596,9 @@ enum {
 	EXT4_STATE_MAY_INLINE_DATA,	/* may have in-inode data */
 	EXT4_STATE_EXT_PRECACHED,	/* extents have been precached */
 	EXT4_STATE_LUSTRE_EA_INODE,	/* Lustre-style ea_inode */
+#ifdef CONFIG_FS_HPB
+	EXT4_STATE_HPB,                 /* HPB I/O */
+#endif
 };
 
 #define EXT4_INODE_BIT_FNS(name, field, offset)				\
