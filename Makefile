@@ -665,6 +665,10 @@ all: vmlinux
 
 KBUILD_CFLAGS	+= $(call cc-option,-fno-PIE)
 KBUILD_AFLAGS	+= $(call cc-option,-fno-PIE)
+
+CFLAGS_PGO_CLANG := -fprofile-generate
+export CFLAGS_PGO_CLANG
+
 ifeq ($(CONFIG_PGO_GEN),y)
 CFLAGS_GCOV := -fprofile-generate
 else

@@ -139,6 +139,7 @@ obj-$(CONFIG_KVM_GUEST)		+= kvm.o kvm_emul.o
 
 # Disable GCOV & sanitizers in odd or sensitive code
 GCOV_PROFILE_prom_init.o := n
+PGO_PROFILE_prom_init.o := n
 UBSAN_SANITIZE_prom_init.o := n
 GCOV_PROFILE_machine_kexec_64.o := n
 UBSAN_SANITIZE_machine_kexec_64.o := n
@@ -148,6 +149,7 @@ GCOV_PROFILE_kprobes.o := n
 UBSAN_SANITIZE_kprobes.o := n
 GCOV_PROFILE_kprobes-ftrace.o := n
 UBSAN_SANITIZE_kprobes-ftrace.o := n
+PGO_PROFILE_kprobes.o := n
 UBSAN_SANITIZE_vdso.o := n
 
 extra-$(CONFIG_PPC_FPU)		+= fpu.o

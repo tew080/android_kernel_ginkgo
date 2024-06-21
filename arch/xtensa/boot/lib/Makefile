@@ -15,6 +15,7 @@ CFLAGS_REMOVE_inftrees.o = -pg
 CFLAGS_REMOVE_inffast.o = -pg
 endif
 
+PGO_PROFILE := n
 
 quiet_cmd_copy_zlib = COPY    $@
       cmd_copy_zlib = cat $< > $@

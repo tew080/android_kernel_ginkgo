@@ -106,3 +106,7 @@ sha256-ssse3-y += sha256_ni_asm.o
 endif
 sha512-ssse3-y := sha512-ssse3-asm.o sha512-avx-asm.o sha512-avx2-asm.o sha512_ssse3_glue.o
 crct10dif-pclmul-y := crct10dif-pcl-asm_64.o crct10dif-pclmul_glue.o
+
+# Disable GCOV and PGO in odd or sensitive code
+GCOV_PROFILE_curve25519-x86_64.o := n
+PGO_PROFILE_curve25519-x86_64.o := n

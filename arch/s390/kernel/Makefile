@@ -20,6 +20,9 @@ GCOV_PROFILE_early.o	:= n
 KCOV_INSTRUMENT_als.o	:= n
 KCOV_INSTRUMENT_early.o	:= n
 
+PGO_PROFILE_early.o		:= n
+PGO_PROFILE_early_nobss.o	:= n
+
 UBSAN_SANITIZE_als.o	:= n
 UBSAN_SANITIZE_early.o	:= n
 

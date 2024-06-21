@@ -24,6 +24,7 @@ OBJS		+= hyp-stub.o
 endif
 
 GCOV_PROFILE		:= n
+PGO_PROFILE		:= n
 
 #
 # Architecture dependencies
