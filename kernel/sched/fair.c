@@ -9596,9 +9596,10 @@ static int detach_tasks(struct lb_env *env)
 	if (env->src_rq->nr_running < 32) {
 		if (!same_cluster(env->dst_cpu, env->src_cpu))
 			env->flags |= LBF_IGNORE_PREFERRED_CLUSTER_TASKS;
-
+#if 0
 		if (cpu_capacity(env->dst_cpu) < cpu_capacity(env->src_cpu))
 			env->flags |= LBF_IGNORE_BIG_TASKS;
+#endif
 	}
 
 redo:
