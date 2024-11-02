@@ -25,7 +25,7 @@ whole; patches welcome!
    kgdb
    kselftes
    pgo
-
+   autofdo
 
 .. only::  subproject and html
 
