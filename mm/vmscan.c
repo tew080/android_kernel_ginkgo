@@ -3909,6 +3909,9 @@ static bool age_lruvec(struct lruvec *lruvec, struct scan_control *sc,
 /* to protect the working set of the last N jiffies */
 static unsigned long lru_gen_min_ttl __read_mostly = 5 * HZ; // 5000ms
 
+#ifdef CONFIG_ANDROID_SIMPLE_LMK
+void simple_lmk_needs_reclaim(void);
+#endif
 static void lru_gen_age_node(struct pglist_data *pgdat, struct scan_control *sc)
 {
 	struct mem_cgroup *memcg;
@@ -3946,6 +3949,13 @@ static void lru_gen_age_node(struct pglist_data *pgdat, struct scan_control *sc)
 	} while ((memcg = mem_cgroup_iter(NULL, memcg, NULL)));
 
 	current->reclaim_state->mm_walk = NULL;
+	
+#ifdef CONFIG_ANDROID_SIMPLE_LMK
+	if (!success) {
+		simple_lmk_needs_reclaim();
+		return;
+	}
+#endif
 
 	/*
 	 * The main goal is to OOM kill if every generation from all memcgs is
