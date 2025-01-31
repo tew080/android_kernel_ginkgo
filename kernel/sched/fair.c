@@ -136,21 +136,21 @@ enum sched_tunable_scaling sysctl_sched_tunable_scaling = SCHED_TUNABLESCALING_L
 /*
  * Minimal preemption granularity for CPU-bound tasks:
  *
- * (default: 0.75 msec * (1 + ilog(ncpus)), units: nanoseconds)
- * (BORE default: 3 msec constant, units: nanoseconds)
+ * (default: 0.50 msec * (1 + ilog(ncpus)), units: nanoseconds)
+ * (BORE default: 5 msec constant, units: nanoseconds)
  */
 #ifdef CONFIG_SCHED_BORE
-unsigned int sysctl_sched_min_granularity		= 3000000ULL;
-unsigned int normalized_sysctl_sched_min_granularity	= 3000000ULL;
+unsigned int sysctl_sched_min_granularity		= 5000000ULL;
+unsigned int normalized_sysctl_sched_min_granularity	= 5000000ULL;
 #else // CONFIG_SCHED_BORE
-unsigned int sysctl_sched_min_granularity		= 750000ULL;
-unsigned int normalized_sysctl_sched_min_granularity	= 750000ULL;
+unsigned int sysctl_sched_min_granularity		= 500000ULL;
+unsigned int normalized_sysctl_sched_min_granularity	= 500000ULL;
 #endif // CONFIG_SCHED_BORE
 
 /*
  * This value is kept at sysctl_sched_latency/sysctl_sched_min_granularity
  */
-static unsigned int sched_nr_latency = 10;
+static unsigned int sched_nr_latency = 6;
 
 /*
  * After fork, child runs first. If set to 0 (default) then
@@ -270,9 +270,9 @@ int __weak arch_asym_cpu_priority(int cpu)
  * to consumption or the quota being specified to be smaller than the slice)
  * we will always only issue the remaining available time.
  *
- * (default: 5 msec, units: microseconds)
+ * (default: 4 msec, units: microseconds)
  */
-unsigned int sysctl_sched_cfs_bandwidth_slice		= 5000UL;
+unsigned int sysctl_sched_cfs_bandwidth_slice		= 4000UL;
 #endif
 
 /*
@@ -6977,7 +6977,42 @@ schedtune_task_margin(struct task_struct *task)
 	return margin;
 }
 
+static inline int
+schedtune_cpu_margin_walt(unsigned long util, int cpu, struct task_struct *p)
+{
+	int boost = schedtune_cpu_boost_walt(cpu, p);
+	long margin;
+
+	if (boost == 0)
+		margin = 0;
+	else
+		margin = schedtune_margin(util, boost, SCHED_CAPACITY_SCALE);
+
+	trace_sched_boost_cpu(cpu, util, margin);
+
+	return margin;
+}
+
+unsigned long
+stune_util(int cpu, unsigned long other_util,
+		 struct sched_walt_cpu_load *walt_load)
+{
+	unsigned long util = min_t(unsigned long, SCHED_CAPACITY_SCALE,
+				   cpu_util_freq(cpu, walt_load) + other_util);
+	long margin = schedtune_cpu_margin_walt(util, cpu, NULL);
+
+	trace_sched_boost_cpu(cpu, util, margin);
+
+	return util + margin;
+}
+
 #else /* CONFIG_SCHED_TUNE */
+
+static inline int
+schedtune_cpu_margin_walt(unsigned long util, int cpu)
+{
+	return 0;
+}
 
 static inline int
 schedtune_cpu_margin(unsigned long util, int cpu)
