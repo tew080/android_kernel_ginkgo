@@ -508,33 +508,6 @@ static struct f2fs_attr f2fs_attr_##_name = {			\
 	.id	= _id,						\
 }
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
->>>>>>> 7bc99c1316c3 (f2fs: hardcode 5 ms for gc_urgent_sleep_time)
-#define F2FS_STAT_ATTR(_struct_type, _struct_name, _name, _elname)	\
-static struct f2fs_attr f2fs_attr_##_name = {			\
-	.attr = {.name = __stringify(_name), .mode = 0444 },	\
-	.show = f2fs_sbi_show,					\
-	.struct_type = _struct_type,				\
-	.offset = offsetof(struct _struct_name, _elname),       \
-}
-
-<<<<<<< HEAD
-F2FS_RW_ATTR(GC_THREAD, f2fs_gc_kthread, gc_urgent_sleep_time,
-							urgent_sleep_time);
-=======
->>>>>>> 7bc99c1316c3 (f2fs: hardcode 5 ms for gc_urgent_sleep_time)
-F2FS_RW_ATTR(GC_THREAD, f2fs_gc_kthread, gc_min_sleep_time, min_sleep_time);
-F2FS_RW_ATTR(GC_THREAD, f2fs_gc_kthread, gc_max_sleep_time, max_sleep_time);
-F2FS_RW_ATTR(GC_THREAD, f2fs_gc_kthread, gc_no_gc_sleep_time, no_gc_sleep_time);
-F2FS_RW_ATTR(F2FS_SBI, f2fs_sb_info, gc_idle, gc_mode);
-F2FS_RW_ATTR(F2FS_SBI, f2fs_sb_info, gc_urgent, gc_mode);
-<<<<<<< HEAD
-=======
->>>>>>> a858b61034fbc (f2fs: hardcode 5 ms for gc_urgent_sleep_time)
->>>>>>> 7bc99c1316c3 (f2fs: hardcode 5 ms for gc_urgent_sleep_time)
 F2FS_RW_ATTR(SM_INFO, f2fs_sm_info, reclaim_segments, rec_prefree_segments);
 F2FS_RW_ATTR(SM_INFO, f2fs_sm_info, main_blkaddr, main_blkaddr);
 F2FS_RW_ATTR(DCC_INFO, discard_cmd_control, max_small_discards, max_discards);
@@ -615,21 +588,6 @@ F2FS_FEATURE_RO_ATTR(compression, FEAT_COMPRESSION);
 
 #define ATTR_LIST(name) (&f2fs_attr_##name.attr)
 static struct attribute *f2fs_attrs[] = {
-<<<<<<< HEAD
-	ATTR_LIST(gc_urgent_sleep_time),
-=======
-<<<<<<< HEAD
-=======
->>>>>>> 7bc99c1316c3 (f2fs: hardcode 5 ms for gc_urgent_sleep_time)
-	ATTR_LIST(gc_min_sleep_time),
-	ATTR_LIST(gc_max_sleep_time),
-	ATTR_LIST(gc_no_gc_sleep_time),
-	ATTR_LIST(gc_idle),
-	ATTR_LIST(gc_urgent),
-<<<<<<< HEAD
-=======
->>>>>>> a858b61034fbc (f2fs: hardcode 5 ms for gc_urgent_sleep_time)
->>>>>>> 7bc99c1316c3 (f2fs: hardcode 5 ms for gc_urgent_sleep_time)
 	ATTR_LIST(reclaim_segments),
 	ATTR_LIST(main_blkaddr),
 	ATTR_LIST(max_small_discards),
