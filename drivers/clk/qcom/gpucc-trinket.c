@@ -35,6 +35,8 @@
 #define CX_GMU_CBCR_SLEEP_SHIFT		4
 #define CX_GMU_CBCR_WAKE_MASK		0xf
 #define CX_GMU_CBCR_WAKE_SHIFT		8
+#define GFX3D_CRC_SID_FSM_CTRL		0x1024
+#define GFX3D_CRC_MND_CFG		0x1028
 
 #define F(f, s, h, m, n) { (f), (s), (2 * (h) - 1), (m), (n) }
 
@@ -47,10 +49,10 @@ enum {
 	P_GPLL0_OUT_MAIN,
 	P_GPLL0_OUT_MAIN_DIV,
 	P_GPU_CC_PLL0_2X_CLK,
-	P_GPU_CC_PLL0_OUT_AUX2,
+	P_CRC_DIV_PLL0_OUT_AUX2,
 	P_GPU_CC_PLL0_OUT_MAIN,
 	P_GPU_CC_PLL1_OUT_AUX,
-	P_GPU_CC_PLL1_OUT_AUX2,
+	P_CRC_DIV_PLL1_OUT_AUX2,
 	P_GPU_CC_PLL1_OUT_MAIN,
 };
 
@@ -75,9 +77,9 @@ static const char * const gpu_cc_parent_names_0[] = {
 static const struct parent_map gpu_cc_parent_map_1[] = {
 	{ P_BI_TCXO, 0 },
 	{ P_GPU_CC_PLL0_2X_CLK, 1 },
-	{ P_GPU_CC_PLL0_OUT_AUX2, 2 },
+	{ P_CRC_DIV_PLL0_OUT_AUX2, 2 },
 	{ P_GPU_CC_PLL1_OUT_AUX, 3 },
-	{ P_GPU_CC_PLL1_OUT_AUX2, 4 },
+	{ P_CRC_DIV_PLL1_OUT_AUX2, 4 },
 	{ P_GPLL0_OUT_MAIN, 5 },
 	{ P_CORE_BI_PLL_TEST_SE, 7 },
 };
@@ -85,9 +87,9 @@ static const struct parent_map gpu_cc_parent_map_1[] = {
 static const char * const gpu_cc_parent_names_1[] = {
 	"bi_tcxo",
 	"gpu_cc_pll0_out_aux",
-	"gpu_cc_pll0_out_aux2",
+	"crc_div_pll0_out_aux2",
 	"gpu_cc_pll1_out_aux",
-	"gpu_cc_pll1_out_aux2",
+	"crc_div_pll1_out_aux2",
 	"gcc_gpu_gpll0_clk_src",
 	"core_bi_pll_test_se",
 };
@@ -187,14 +189,38 @@ static struct clk_rcg2 gpu_cc_gmu_clk_src = {
 	},
 };
 
+static struct clk_fixed_factor crc_div_pll0_out_aux2 = {
+	.mult = 1,
+	.div = 2,
+	.hw.init = &(struct clk_init_data){
+		.name = "crc_div_pll0_out_aux2",
+		.parent_names = (const char *[]){ "gpu_cc_pll0_out_aux2" },
+		.num_parents = 1,
+		.flags = CLK_SET_RATE_PARENT,
+		.ops = &clk_fixed_factor_ops,
+	},
+};
+ 
+static struct clk_fixed_factor crc_div_pll1_out_aux2 = {
+	.mult = 1,
+	.div = 2,
+	.hw.init = &(struct clk_init_data){
+		.name = "crc_div_pll1_out_aux2",
+		.parent_names = (const char *[]){ "gpu_cc_pll1_out_aux2" },
+		.num_parents = 1,
+		.flags = CLK_SET_RATE_PARENT,
+		.ops = &clk_fixed_factor_ops,
+	},
+};
+
 static const struct freq_tbl ftbl_gpu_cc_gx_gfx3d_clk_src[] = {
-	F(320000000, P_GPU_CC_PLL1_OUT_AUX2, 2, 0, 0),
-	F(465000000, P_GPU_CC_PLL1_OUT_AUX2, 2, 0, 0),
-	F(600000000, P_GPU_CC_PLL0_OUT_AUX2, 2, 0, 0),
-	F(745000000, P_GPU_CC_PLL0_OUT_AUX2, 2, 0, 0),
-	F(820000000, P_GPU_CC_PLL0_OUT_AUX2, 2, 0, 0),
-	F(900000000, P_GPU_CC_PLL0_OUT_AUX2, 2, 0, 0),
-	F(950000000, P_GPU_CC_PLL0_OUT_AUX2, 2, 0, 0),
+	F(320000000, P_CRC_DIV_PLL1_OUT_AUX2, 1, 0, 0),
+	F(465000000, P_CRC_DIV_PLL1_OUT_AUX2, 1, 0, 0),
+	F(600000000, P_CRC_DIV_PLL0_OUT_AUX2, 1, 0, 0),
+	F(745000000, P_CRC_DIV_PLL0_OUT_AUX2, 1, 0, 0),
+	F(820000000, P_CRC_DIV_PLL0_OUT_AUX2, 1, 0, 0),
+	F(900000000, P_CRC_DIV_PLL0_OUT_AUX2, 1, 0, 0),
+	F(950000000, P_CRC_DIV_PLL0_OUT_AUX2, 1, 0, 0),
 	{ }
 };
 
@@ -383,6 +409,11 @@ static struct clk_branch gpu_cc_hlos1_vote_gpu_smmu_clk = {
 	},
 };
 
+struct clk_hw *gpu_cc_trinket_hws[] = {
+	[CRC_DIV_PLL0_OUT_AUX2] = &crc_div_pll0_out_aux2.hw,
+	[CRC_DIV_PLL1_OUT_AUX2] = &crc_div_pll1_out_aux2.hw,
+};
+
 static struct clk_regmap *gpu_cc_trinket_clocks[] = {
 	[GPU_CC_CRC_AHB_CLK] = &gpu_cc_crc_ahb_clk.clkr,
 	[GPU_CC_CX_APB_CLK] = &gpu_cc_cx_apb_clk.clkr,
@@ -413,6 +444,8 @@ static const struct qcom_cc_desc gpu_cc_trinket_desc = {
 	.config = &gpu_cc_trinket_regmap_config,
 	.clks = gpu_cc_trinket_clocks,
 	.num_clks = ARRAY_SIZE(gpu_cc_trinket_clocks),
+	.hwclks = gpu_cc_trinket_hws,
+	.num_hwclks = ARRAY_SIZE(gpu_cc_trinket_hws),
 };
 
 static const struct of_device_id gpu_cc_trinket_match_table[] = {
@@ -468,6 +501,15 @@ static int gpu_cc_trinket_probe(struct platform_device *pdev)
 		dev_err(&pdev->dev, "Failed to register GPU CC clocks\n");
 		return ret;
 	}
+
+	/* After POR, Clock Ramp Controller(CRC) will be in bypass mode.
+	 * Software needs to do the following operation to enable the CRC
+	 * for GFX3D clock and divide the input clock by div by 2.
+	 */
+	 regmap_update_bits(regmap, 
+			GFX3D_CRC_MND_CFG, 0x00015011, 0x00015011);
+	 regmap_update_bits(regmap,
+			GFX3D_CRC_SID_FSM_CTRL, 0x00800000, 0x00800000);
 
 	dev_info(&pdev->dev, "Registered GPU CC clocks\n");
 
