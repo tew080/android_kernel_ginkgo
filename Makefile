@@ -726,11 +726,40 @@ else ifdef CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE_O3
 KBUILD_CFLAGS   += -O3
 else ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS   += -Os
+# Snapdragon optimization
+ifeq ($(cc-name),gcc)
+KBUILD_CFLAGS	+= -mcpu=cortex-a73.cortex-a53 -mtune=cortex-a73.cortex-a53
+endif
 ifeq ($(cc-name),clang)
 KBUILD_CFLAGS	+= -mcpu=cortex-a53 -mtune=cortex-a53
+endif
+KBUILD_CFLAGS  +=  -march=armv8-a+fp+simd+crc+crypto 
+
+# Low latency CPU reaction & scheduling
+KBUILD_CFLAGS += -mllvm -enable-post-misched
+KBUILD_CFLAGS += -fno-stack-protector         
+KBUILD_CFLAGS += -fno-asynchronous-unwind-tables
+
+# Inlin optimization
+KBUILD_CFLAGS += -finline-functions -mllvm -enable-pipeliner \
+		-mllvm -enable-loop-distribute \
+		-mllvm -enable-loopinterchange \
+		-mllvm -enable-machine-outliner=never
+
+KBUILD_CFLAGS += -mllvm -inline-threshold=550 \
+		-mllvm -inlinehint-threshold=450 \
+		-mllvm -unroll-runtime \
+		-mllvm -unroll-count=4 \
+		-mllvm -unroll-threshold=800 \
+		-mllvm -unroll-partial-threshold=800
+
+# Increase the speed of mathematical calculations
+KBUILD_CFLAGS += -O3 -ffp-contract=fast -ffast-math \
+		-fno-trapping-math -fno-math-errno \
+		-freciprocal-math -fassociative-math \
+		-fno-stack-protector    
 
 ifdef CONFIG_LLVM_POLLY
-
 KBUILD_CFLAGS	+= -mllvm -polly \
 		   -mllvm -polly-ast-use-context \
 		   -mllvm -polly-invariant-load-hoisting \
@@ -754,7 +783,6 @@ KBUILD_CFLAGS	+= -mllvm -polly-run-dce
 endif
 endif # CONFIG_LLVM_POLLY
 
-endif # $(cc-name),clang
 endif # CONFIG_CC_OPTIMIZE_FOR_SIZE
 
 # Tell gcc to never replace conditional load with a non-conditional one
