@@ -718,19 +718,20 @@ ifeq ($(cc-name),clang)
 KBUILD_CFLAGS	+= -mcpu=cortex-a53 -mtune=cortex-a53
 
 ifdef CONFIG_LLVM_POLLY
+
 KBUILD_CFLAGS	+= -mllvm -polly \
-		   -mllvm -polly-run-inliner \
 		   -mllvm -polly-ast-use-context \
-		   -mllvm -polly-detect-keep-going \
 		   -mllvm -polly-invariant-load-hoisting \
-		   -mllvm -polly-vectorizer=stripmine \
+		   -mllvm -polly-isl-arg=--no-schedule-serialize-sccs \
 		   -mllvm -polly-loopfusion-greedy=1 \
-		   -mllvm -polly-reschedule=1 \
-		   -mllvm -polly-postopts=1 \
 		   -mllvm -polly-num-threads=0 \
 		   -mllvm -polly-omp-backend=LLVM \
+		   -mllvm -polly-postopts=1 \
+		   -mllvm -polly-reschedule=1 \
+		   -mllvm -polly-run-inliner \
+		   -mllvm -polly-scheduling-chunksize=1 \
 		   -mllvm -polly-scheduling=dynamic \
-		   -mllvm -polly-scheduling-chunksize=1
+		   -mllvm -polly-vectorizer=stripmine
 
 # Polly may optimise loops with dead paths beyound what the linker
 # can understand. This may negate the effect of the linker's DCE
