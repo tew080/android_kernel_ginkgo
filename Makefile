@@ -754,7 +754,7 @@ KBUILD_CFLAGS += -mllvm -inline-threshold=550 \
 		-mllvm -unroll-partial-threshold=800
 
 # Increase the speed of mathematical calculations
-KBUILD_CFLAGS += -O3 -ffp-contract=fast -ffast-math \
+KBUILD_CFLAGS += -ffp-contract=fast -ffast-math \
 		-fno-trapping-math -fno-math-errno \
 		-freciprocal-math -fassociative-math \
 		-fno-stack-protector    
