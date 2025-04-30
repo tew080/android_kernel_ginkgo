@@ -763,3 +763,13 @@ CONFIG_SCHED_BORE=y
 ## end KernelSU function 
 ######
 
+######
+# UClamp Scheduler tunables
+######
+CONFIG_UCLAMP_TASK=y
+CONFIG_UCLAMP_BUCKETS_COUNT=20
+CONFIG_UCLAMP_TASK_GROUP=y
+CONFIG_UCLAMP_ASSIST=y
+######
+## end UClamp Scheduler tunables
+######

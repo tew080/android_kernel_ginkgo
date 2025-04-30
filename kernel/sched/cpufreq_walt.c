@@ -345,6 +345,9 @@ static unsigned long waltgov_get_util(struct waltgov_cpu *sg_cpu)
 	sg_cpu->max = max;
 	sg_cpu->bw_dl = cpu_bw_dl(rq);
 
+#ifdef CONFIG_UCLAMP_TASK
+	*util = uclamp_util_with(rq, *util, NULL);
+#endif	
 	return stune_util(sg_cpu->cpu, 0, &sg_cpu->walt_load);
 }
 #else
