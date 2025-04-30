@@ -359,6 +359,9 @@ static unsigned long waltgov_get_util(struct waltgov_cpu *sg_cpu)
 	sg_cpu->bw_dl = cpu_bw_dl(rq);
 
 	util = cpu_util_freq_walt(wg_cpu->cpu, &wg_cpu->walt_load);
+#ifdef CONFIG_UCLAMP_TASK
+	*util = uclamp_util_with(rq, *util, NULL);
+#endif	
 	return uclamp_rq_util_with(rq, util, NULL);
 }
 #endif
