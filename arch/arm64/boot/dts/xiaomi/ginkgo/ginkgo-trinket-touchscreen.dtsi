@@ -13,7 +13,7 @@
 
 		/* SPI Configuration */
 		spi-cs-high;
-		spi-max-frequency = <8000000>;
+		spi-max-frequency = <10000000>;
 
 		/* regulator Configuration */
 		touch_vddio-supply = <&L9A>;

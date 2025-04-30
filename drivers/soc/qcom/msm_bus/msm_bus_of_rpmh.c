@@ -26,7 +26,7 @@
 #include "msm_bus_core.h"
 #include "msm_bus_rpmh.h"
 
-#define DEFAULT_QOS_FREQ	19200
+#define DEFAULT_QOS_FREQ	25600
 #define DEFAULT_UTIL_FACT	100
 #define DEFAULT_VRAIL_COMP	100
 #define DEFAULT_AGG_SCHEME	AGG_SCHEME_LEG
