@@ -27,6 +27,9 @@
 #include <linux/of_irq.h>
 #include <linux/pm_runtime.h>
 
+#include <linux/cpu_input_boost.h>
+#include <linux/devfreq_boost.h>
+
 #if defined(CONFIG_FB)
 #ifdef CONFIG_DRM_MSM
 #include <linux/msm_drm_notify.h>
@@ -1308,6 +1311,9 @@ static irqreturn_t nvt_ts_work_func(int irq, void *data)
 #endif
 
 	mutex_lock(&ts->lock);
+
+	cpu_input_boost_kick_max(50);
+	devfreq_boost_kick_max(DEVFREQ_CPU_DDR_BW, 50);
 
 	ret = CTP_SPI_READ(ts->client, point_data, POINT_DATA_LEN + 1);
 	if (ret < 0) {

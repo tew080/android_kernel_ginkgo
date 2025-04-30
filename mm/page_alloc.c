@@ -77,6 +77,9 @@
 #include <asm/div64.h>
 #include "internal.h"
 
+#include <linux/cpu_input_boost.h>
+#include <linux/devfreq_boost.h>
+
 atomic_long_t kswapd_waiters = ATOMIC_LONG_INIT(0);
 atomic_long_t kshrinkd_waiters = ATOMIC_LONG_INIT(0);
 
@@ -4337,6 +4340,10 @@ retry:
 	 */
 	if (costly_order && !(gfp_mask & __GFP_RETRY_MAYFAIL))
 		goto nopage;
+
+	/* Boost when memory is low so allocation latency doesn't get too bad */
+	cpu_input_boost_kick_max(100);
+	devfreq_boost_kick_max(DEVFREQ_CPU_DDR_BW, 250);
 
 	if (should_reclaim_retry(gfp_mask, order, ac, alloc_flags,
 				 did_some_progress > 0, &no_progress_loops))

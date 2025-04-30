@@ -29,6 +29,9 @@
 #include <linux/workqueue.h>
 #include "internal.h"
 
+#include <linux/cpu_input_boost.h>
+#include <linux/devfreq_boost.h>
+
 #ifdef CONFIG_COMPACTION
 static inline void count_compact_event(enum vm_event_item item)
 {
@@ -2038,6 +2041,9 @@ static void kcompactd_do_work(pg_data_t *pgdat)
 	trace_mm_compaction_kcompactd_wake(pgdat->node_id, cc.order,
 							cc.classzone_idx);
 	count_compact_event(KCOMPACTD_WAKE);
+
+	cpu_input_boost_kick_max(100);
+	devfreq_boost_kick_max(DEVFREQ_CPU_DDR_BW, 250);
 
 	for (zoneid = 0; zoneid <= cc.classzone_idx; zoneid++) {
 		int status;
