@@ -5,9 +5,10 @@
 
 SECONDS=0 # builtin bash timer
 ZIPNAME="QuicksilveRV2-ginkgo-$(date '+%Y%m%d-%H%M').zip"
-TC_DIR="/home/tew/kernel/Yuki+boltclangversion21.0.0-20250424"
+TC_DIR="/home/tew/kernel/clang-r547379"
 GCC_64_DIR="/home/tew/kernel/aarch64-linux-android-4.9"
 GCC_32_DIR="/home/tew/kernel/arm-linux-androideabi-4.9"
+linuxgnu="/home/tew/kernel/Clang-21.0.0"
 DEFCONFIG="vendor/ginkgo-perf_defconfig"
 
 export PATH="$TC_DIR/bin:$PATH"
@@ -41,7 +42,7 @@ make -j$(nproc --all) O=out \
    STRIP=llvm-strip \
    CROSS_COMPILE=$GCC_64_DIR/bin/aarch64-linux-android- \
    CROSS_COMPILE_ARM32=$GCC_32_DIR/bin/arm-linux-androideabi- \
-   CLANG_TRIPLE=aarch64-linux-gnu- \
+   CLANG_TRIPLE=$linuxgnu/bin/aarch64-linux-gnu- \
    Image.gz-dtb dtbo.img
 
 kernel="out/arch/arm64/boot/Image.gz-dtb"

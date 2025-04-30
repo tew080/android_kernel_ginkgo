@@ -702,8 +702,38 @@ export LLVM_AR LLVM_NM
 endif
 
 ifdef CONFIG_GCC_GRAPHITE
-KBUILD_CFLAGS	+= -fgraphite-identity -floop-nest-optimize
+ifeq ($(cc-name),gcc)
+KBUILD_CFLAGS	+= -fipa-pta -fgraphite-identity -floop-nest-optimize -fno-semantic-interposition
 endif
+endif
+
+# Low latency CPU reaction & scheduling
+KBUILD_CFLAGS += -mllvm -enable-post-misched
+KBUILD_CFLAGS += -fno-stack-protector         
+KBUILD_CFLAGS += -fno-asynchronous-unwind-tables
+
+# Inlin optimization
+KBUILD_CFLAGS += -finline-functions -mllvm -enable-pipeliner \
+		-mllvm -enable-loop-distribute \
+		-mllvm -enable-loopinterchange \
+		-mllvm -enable-machine-outliner=never
+
+KBUILD_CFLAGS += -mllvm -inline-threshold=850 \
+		-mllvm -inlinehint-threshold=550 \
+		-mllvm -unroll-runtime \
+		-mllvm -unroll-count=4 \
+		-mllvm -unroll-threshold=900 \
+		-mllvm -unroll-partial-threshold=900
+
+# Increase the speed of mathematical calculations
+KBUILD_CFLAGS += -ffp-contract=fast -ffast-math \
+		-fno-trapping-math -fno-math-errno \
+		-freciprocal-math -fassociative-math \
+		-fno-stack-protector    
+
+# Snapdragon optimization
+KBUILD_CFLAGS	+= -mcpu=cortex-a73 -mtune=cortex-a73
+KBUILD_CFLAGS  +=  -march=armv8-a+fp+simd+crc+crypto 
 
 # The arch Makefile can set ARCH_{CPP,A,C}FLAGS to override the default
 # values of the respective KBUILD_* variables
@@ -726,38 +756,7 @@ else ifdef CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE_O3
 KBUILD_CFLAGS   += -O3
 else ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS   += -Os
-# Snapdragon optimization
-ifeq ($(cc-name),gcc)
-KBUILD_CFLAGS	+= -mcpu=cortex-a73.cortex-a53 -mtune=cortex-a73.cortex-a53
-endif
-ifeq ($(cc-name),clang)
-KBUILD_CFLAGS	+= -mcpu=cortex-a53 -mtune=cortex-a53
-endif
-KBUILD_CFLAGS  +=  -march=armv8-a+fp+simd+crc+crypto 
-
-# Low latency CPU reaction & scheduling
-KBUILD_CFLAGS += -mllvm -enable-post-misched
-KBUILD_CFLAGS += -fno-stack-protector         
-KBUILD_CFLAGS += -fno-asynchronous-unwind-tables
-
-# Inlin optimization
-KBUILD_CFLAGS += -finline-functions -mllvm -enable-pipeliner \
-		-mllvm -enable-loop-distribute \
-		-mllvm -enable-loopinterchange \
-		-mllvm -enable-machine-outliner=never
-
-KBUILD_CFLAGS += -mllvm -inline-threshold=550 \
-		-mllvm -inlinehint-threshold=450 \
-		-mllvm -unroll-runtime \
-		-mllvm -unroll-count=4 \
-		-mllvm -unroll-threshold=800 \
-		-mllvm -unroll-partial-threshold=800
-
-# Increase the speed of mathematical calculations
-KBUILD_CFLAGS += -ffp-contract=fast -ffast-math \
-		-fno-trapping-math -fno-math-errno \
-		-freciprocal-math -fassociative-math \
-		-fno-stack-protector    
+endif # CONFIG_CC_OPTIMIZE_FOR_SIZE
 
 ifdef CONFIG_LLVM_POLLY
 KBUILD_CFLAGS	+= -mllvm -polly \
@@ -782,8 +781,6 @@ ifdef CONFIG_LD_DEAD_CODE_DATA_ELIMINATION
 KBUILD_CFLAGS	+= -mllvm -polly-run-dce
 endif
 endif # CONFIG_LLVM_POLLY
-
-endif # CONFIG_CC_OPTIMIZE_FOR_SIZE
 
 # Tell gcc to never replace conditional load with a non-conditional one
 KBUILD_CFLAGS	+= $(call cc-option,--param=allow-store-data-races=0)
