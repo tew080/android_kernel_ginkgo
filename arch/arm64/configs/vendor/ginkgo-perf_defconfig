@@ -826,3 +826,10 @@ CONFIG_MIN_FREQ_PERF=902400
 ## end CPU INPUT BOOST Driver
 ######
 
+######
+# DRM Frame BOOST
+######
+CONFIG_DRM_FRAME_BOOST_TIMEOUT=3250
+######
+## end DRM Frame BOOST
+######
