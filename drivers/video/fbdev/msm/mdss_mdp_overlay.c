@@ -41,9 +41,6 @@
 #include "mdss_dsi_clk.h"
 #include "mdss_sync.h"
 
-#include <linux/cpu_input_boost.h>
-#include <linux/devfreq_boost.h>
-
 #define VSYNC_PERIOD 16
 #define BORDERFILL_NDX	0x0BF000BF
 #define CHECK_BOUNDS(offset, size, max_size) \
@@ -5272,8 +5269,6 @@ static int __handle_overlay_prepare(struct msm_fb_data_type *mfd,
 		}
 	}
 
-	devfreq_boost_kick_max(DEVFREQ_CPU_DDR_BW, 1000);
-
 	pr_debug("prepare fb%d num_ovs=%d\n", mfd->index, num_ovs);
 
 	for (i = 0; i < num_ovs; i++) {
@@ -6296,7 +6291,7 @@ static int __vsync_retire_setup(struct msm_fb_data_type *mfd)
 		kthread_init_work(&mdp5_data->vsync_work,
 			__vsync_retire_work_handler);
 
-			mdp5_data->thread = kthread_run_perf_critical(kthread_worker_fn,
+		mdp5_data->thread = kthread_run(kthread_worker_fn,
 					&mdp5_data->worker,
 					"vsync_retire_work");
 		if (IS_ERR(mdp5_data->thread)) {

@@ -36,8 +36,6 @@
 
 #include "drm_crtc_internal.h"
 
-#include <linux/cpu_input_boost.h>
-
 void __drm_crtc_commit_free(struct kref *kref)
 {
 	struct drm_crtc_commit *commit =
@@ -2265,7 +2263,6 @@ static int __drm_mode_atomic_ioctl(struct drm_device *dev, void *data,
 
 	if (!(arg->flags & DRM_MODE_ATOMIC_TEST_ONLY) &&
 			df_boost_within_input(3250))
-		cpu_input_boost_kick_max(100);
 		devfreq_boost_kick(DEVFREQ_CPU_DDR_BW);
 
 	drm_modeset_acquire_init(&ctx, 0);

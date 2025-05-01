@@ -18,8 +18,6 @@
 
 #include <trace/events/cgroup.h>
 
-#include <linux/cpu_input_boost.h>
-
 /*
  * pidlists linger the following amount before being destroyed.  The goal
  * is avoiding frequent destruction in the middle of consecutive read calls
@@ -546,7 +544,6 @@ static ssize_t __cgroup1_procs_write(struct kernfs_open_file *of,
 	if (!ret && !threadgroup &&
 	    !strcmp(of->kn->parent->name, "top-app") &&
 	    task_is_zygote(task)) {
-		cpu_input_boost_kick_max(350);
 		devfreq_boost_kick_max(DEVFREQ_CPU_DDR_BW, 1000);
 	}
 

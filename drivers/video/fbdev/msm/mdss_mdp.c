@@ -62,9 +62,6 @@
 
 #include "mdss_mdp_trace.h"
 
-#include <linux/cpu_input_boost.h>
-#include <linux/devfreq_boost.h>
-
 #define AXI_HALT_TIMEOUT_US	0x4000
 #define AUTOSUSPEND_TIMEOUT_MS	200
 #define DEFAULT_MDP_PIPE_WIDTH	2048
@@ -1905,7 +1902,7 @@ static int mdss_mdp_irq_clk_setup(struct mdss_data_type *mdata)
 	pr_debug("max mdp clk rate=%d\n", mdata->max_mdp_clk_rate);
 
 	ret = devm_request_irq(&mdata->pdev->dev, mdss_mdp_hw.irq_info->irq,
-				mdss_irq_handler, IRQF_PERF_CRITICAL, "MDSS", mdata);
+				mdss_irq_handler, 0x0, "MDSS", mdata);
 	if (ret) {
 		pr_err("mdp request_irq() failed!\n");
 		return ret;

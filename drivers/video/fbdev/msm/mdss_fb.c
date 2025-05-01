@@ -49,10 +49,6 @@
 #include <uapi/linux/sched/types.h>
 #include "mdss_fb.h"
 #include "mdss_mdp_splash_logo.h"
-
-#include <linux/cpu_input_boost.h>
-#include <linux/devfreq_boost.h>
-
 #define CREATE_TRACE_POINTS
 #include "mdss_debug.h"
 #include "mdss_smmu.h"
@@ -84,17 +80,6 @@
  * Default value is set to 1 sec.
  */
 #define MDP_TIME_PERIOD_CALC_FPS_US	1000000
-
-static int frame_boost_timeout __read_mostly = CONFIG_DRM_FRAME_BOOST_TIMEOUT;
-module_param(frame_boost_timeout, int, 0644);
-static void drm_kick_frame_boost(int timeout_ms)
-{
-	if (!timeout_ms)
-		return;
-	if (timeout_ms < 0) {
-		devfreq_boost_kick(DEVFREQ_CPU_DDR_BW);
-	}
-}
 
 static struct fb_info *fbi_list[MAX_FBI_LIST];
 static int fbi_list_index;
@@ -1839,7 +1824,7 @@ static int mdss_fb_start_disp_thread(struct msm_fb_data_type *mfd)
 	mdss_fb_get_split(mfd);
 
 	atomic_set(&mfd->commits_pending, 0);
-	mfd->disp_thread = kthread_run_perf_critical(__mdss_fb_display_thread,
+	mfd->disp_thread = kthread_run(__mdss_fb_display_thread,
 				mfd, "mdss_fb%d", mfd->index);
 
 	if (IS_ERR(mfd->disp_thread)) {
@@ -5097,7 +5082,6 @@ int mdss_fb_do_ioctl(struct fb_info *info, unsigned int cmd,
 		ret = mdss_fb_mode_switch(mfd, dsi_mode);
 		break;
 	case MSMFB_ATOMIC_COMMIT:
-		drm_kick_frame_boost(DEVFREQ_CPU_DDR_BW);
 		ret = mdss_fb_atomic_commit_ioctl(info, argp, file);
 		break;
 
