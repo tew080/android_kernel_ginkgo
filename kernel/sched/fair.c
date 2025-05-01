@@ -4117,36 +4117,6 @@ static inline int util_fits_cpu(unsigned long util,
 	return fits;
 }
 
-static inline int task_fits_cpu(struct task_struct *p, int cpu)
-{
-	unsigned long uclamp_min = uclamp_eff_value(p, UCLAMP_MIN);
-	unsigned long uclamp_max = uclamp_eff_value(p, UCLAMP_MAX);
-	unsigned long util = task_util_est(p);
-	return util_fits_cpu(util, uclamp_min, uclamp_max, cpu);
-}
-
-static inline void update_misfit_status(struct task_struct *p, struct rq *rq)
-{
-	if (!static_branch_unlikely(&sched_asym_cpucapacity))
-		return;
-
-	if (!p || p->nr_cpus_allowed == 1) {
-		rq->misfit_task_load = 0;
-		return;
-	}
-
-	if (task_fits_cpu(p, cpu_of(rq))) {
-		rq->misfit_task_load = 0;
-		return;
-	}
-
-	/*
-	 * Make sure that misfit_task_load will not be null even if
-	 * task_h_load() returns 0.
-	 */
-	rq->misfit_task_load = max_t(unsigned long, task_h_load(p), 1);
-}
-
 #else /* CONFIG_SMP */
 
 static inline int
@@ -8117,8 +8087,6 @@ static inline int find_best_target(struct task_struct *p, int *backup_cpu,
 			new_util = max(min_util, new_util);
 			if (!(prefer_idle && idle_cpu(i))
 				&& new_util > capacity_orig)
-			if ((!(prefer_idle && idle_cpu(i)) &&
-			    new_util > capacity_orig) || !task_fits_cpu(p, capacity_orig))
 				continue;
 
 			/*
