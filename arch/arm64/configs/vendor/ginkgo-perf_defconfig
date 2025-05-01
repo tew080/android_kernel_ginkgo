@@ -5939,3 +5939,10 @@ CONFIG_SBALANCE_EXCLUDE_CPUS=6,7
 ## end of  SBalance IRQ balancer
 ######
 
+######
+# DRM Frame BOOST
+######
+CONFIG_DRM_FRAME_BOOST_TIMEOUT=3250
+######
+## end DRM Frame BOOST
+######
