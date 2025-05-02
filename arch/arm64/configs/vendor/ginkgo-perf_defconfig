@@ -835,5 +835,13 @@ CONFIG_DRM_FRAME_BOOST_TIMEOUT=3250
 ## end DRM Frame BOOST
 ######
 
+######
+# LRU (Least Recently Used memory management mechanism)
+######
 CONFIG_LRU_GEN=y
+CONFIG_LRU_GEN_ENABLED=y
 # CONFIG_LRU_GEN_STATS is not set
+######
+## end LRU (Least Recently Used memory management mechanism)
+######
+
