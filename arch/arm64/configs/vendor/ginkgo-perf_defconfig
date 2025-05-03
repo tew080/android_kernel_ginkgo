@@ -845,3 +845,10 @@ CONFIG_LRU_GEN_ENABLED=y
 ## end LRU (Least Recently Used memory management mechanism)
 ######
 
+######
+# CASS (Capacity Aware Superset Scheduler)
+######
+CONFIG_SCHED_CASS=y
+######
+## end CASS (Capacity Aware Superset Scheduler)
+######
