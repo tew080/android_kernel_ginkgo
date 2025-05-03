@@ -5831,3 +5831,11 @@ CONFIG_ARCH_HAS_SG_CHAIN=y
 CONFIG_SBITMAP=y
 # CONFIG_STRING_SELFTEST is not set
 CONFIG_WIREGUARD=y
+
+######
+# CASS (Capacity Aware Superset Scheduler)
+######
+CONFIG_SCHED_CASS=y
+######
+## end CASS (Capacity Aware Superset Scheduler)
+######
