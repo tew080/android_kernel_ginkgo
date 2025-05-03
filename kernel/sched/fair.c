@@ -283,10 +283,10 @@ unsigned int sysctl_sched_cfs_bandwidth_slice		= 4000UL;
  */
 unsigned int capacity_margin				= 1280;
 #if NR_CPUS == 8
-unsigned int sched_capacity_margin_up_boosted[NR_CPUS] = {
+unsigned int sched_capacity_margin_up[NR_CPUS] = {
 	1280, 1280, 1280, 1280, 1280, 1280, 1280, 1078
 }; /* ~20% margin for small and big, 5% for big+ */
-unsigned int sched_capacity_margin_down_boosted[NR_CPUS] = {
+unsigned int sched_capacity_margin_down[NR_CPUS] = {
 	1280, 1280, 1280, 1280, 1575, 1575, 1575, 1280
 }; /* not used for small cores, ~35% margin for big, ~20% margin for big+ */
 #else
