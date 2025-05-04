@@ -5,10 +5,10 @@
 
 SECONDS=0 # builtin bash timer
 ZIPNAME="ERROR-VTWO-ginkgo-KSU-Next+SuSFS-$(date '+%Y%m%d-%H%M').zip"
-TC_DIR="/home/tew/kernel/SDclang-18"
+TC_DIR="/home/tew/kernel/RvClang"
 GCC_64_DIR="/home/tew/kernel/aarch64-linux-android-4.9"
 GCC_32_DIR="/home/tew/kernel/arm-linux-androideabi-4.9"
-linuxgnu="/home/tew/kernel/Clang-21.0.0"
+linuxgnu="/home/tew/kernel/RvClang"
 DEFCONFIG="vendor/ginkgo-perf_defconfig"
 
 export PATH="${TC_DIR}/bin:${GCC_64_DIR}/bin:${GCC_32_DIR}/bin:/usr/bin:${PATH}"
