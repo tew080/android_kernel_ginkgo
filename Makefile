@@ -808,6 +808,7 @@ KBUILD_CFLAGS	+=	-fprofile-use \
 			-fprofile-partial-training \
 			-Wno-error=coverage-mismatch
 endif
+endif
 
 ifdef CONFIG_INLINE_OPTIMIZATION
 # Inlin optimization
@@ -815,8 +816,8 @@ INLINE_FLAGS += -finline-functions -mllvm -enable-pipeliner \
 		-mllvm -enable-loop-distribute \
 		-mllvm -enable-loopinterchange \
 		-mllvm -enable-machine-outliner=never \
-		-mllvm -inline-threshold=850 \
-		-mllvm -inlinehint-threshold=550 \
+		-mllvm -inline-threshold=4000 \
+		-mllvm -inlinehint-threshold=3000 \
 		-mllvm -unroll-runtime \
 		-mllvm -unroll-count=4 \
 		-mllvm -unroll-threshold=900 \
@@ -825,8 +826,6 @@ INLINE_FLAGS += -finline-functions -mllvm -enable-pipeliner \
 KBUILD_CFLAGS += $(INLINE_FLAGS)
 KBUILD_AFLAGS += $(INLINE_FLAGS)
 KBUILD_LDFLAGS += $(INLINE_FLAGS)
-endif
-
 endif
 
 # Tell gcc to never replace conditional load with a non-conditional one
