@@ -56,6 +56,4 @@ config GCOV_FORMAT_CLANG
 	---help---
 	Select this option to use the format defined by Clang.
 
-endchoice
-
 endmenu
