@@ -783,19 +783,23 @@ KBUILD_CFLAGS   += -Os
 endif # CONFIG_CC_OPTIMIZE_FOR_SIZE
 
 ifdef CONFIG_LLVM_POLLY
-KBUILD_CFLAGS	+= -mllvm -polly \
-		   -mllvm -polly-ast-use-context \
-		   -mllvm -polly-invariant-load-hoisting \
-		   -mllvm -polly-isl-arg=--no-schedule-serialize-sccs \
-		   -mllvm -polly-loopfusion-greedy=1 \
-		   -mllvm -polly-num-threads=0 \
-		   -mllvm -polly-omp-backend=LLVM \
-		   -mllvm -polly-postopts=1 \
-		   -mllvm -polly-reschedule=1 \
-		   -mllvm -polly-run-inliner \
-		   -mllvm -polly-scheduling-chunksize=1 \
-		   -mllvm -polly-scheduling=dynamic \
-		   -mllvm -polly-vectorizer=stripmine
+POLLY_FLAGS	:= -mllvm -polly \
+		-mllvm -polly-run-dce \
+		-mllvm -polly-run-inliner \
+		-mllvm -polly-loopfusion-greedy=1 \
+		-mllvm -polly-reschedule=1 \
+		-mllvm -polly-postopts=1 \
+		-mllvm -polly-num-threads=0 \
+	    -mllvm -polly-omp-backend=LLVM \
+		-mllvm -polly-scheduling=dynamic \
+		-mllvm -polly-scheduling-chunksize=1 \
+		-mllvm -polly-ast-use-context \
+		-mllvm -polly-detect-keep-going \
+		-mllvm -polly-vectorizer=stripmine \
+		-mllvm -polly-invariant-load-hoisting
+ 
+KBUILD_CFLAGS += $(POLLY_FLAGS)
+KBUILD_LDFLAGS += $(POLLY_FLAGS)
 
 # Polly may optimise loops with dead paths beyound what the linker
 # can understand. This may negate the effect of the linker's DCE
