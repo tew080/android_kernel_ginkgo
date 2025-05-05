@@ -95,13 +95,13 @@ static int default_target_loads[] = {DEFAULT_TARGET_LOAD};
 
 /************************ Governor internals ***********************/
 
-static bool waltgov_should_rate_limit(struct waltgov_policy *wg_policy, u64 time)
+static inline bool waltgov_should_rate_limit(struct waltgov_policy *wg_policy, u64 time)
 {
 	s64 delta_ns = time - wg_policy->last_freq_update_time;
 	return delta_ns < wg_policy->freq_update_delay_ns;
 }
 
-static bool waltgov_should_update_freq(struct waltgov_policy *wg_policy, u64 time)
+static inline bool waltgov_should_update_freq(struct waltgov_policy *wg_policy, u64 time)
 {
 	if (!cpufreq_can_do_remote_dvfs(wg_policy->policy))
 		return false;
@@ -132,7 +132,7 @@ static inline bool use_pelt(void)
 #endif
 }
 
-static bool waltgov_update_next_freq(struct waltgov_policy *wg_policy, u64 time,
+static inline bool waltgov_update_next_freq(struct waltgov_policy *wg_policy, u64 time,
 						unsigned int next_freq)
 
 {
@@ -177,7 +177,7 @@ static void waltgov_track_cycles(struct waltgov_policy *wg_policy,
 	wg_policy->last_cyc_update_time = upto;
 }
 
-static void waltgov_calc_avg_cap(struct waltgov_policy *wg_policy, u64 curr_ws,
+static inline void waltgov_calc_avg_cap(struct waltgov_policy *wg_policy, u64 curr_ws,
 				unsigned int prev_freq)
 {
 	u64 last_ws = wg_policy->last_ws;
@@ -204,7 +204,7 @@ static void waltgov_calc_avg_cap(struct waltgov_policy *wg_policy, u64 curr_ws,
 	wg_policy->curr_cycles = 0;
 	wg_policy->last_ws = curr_ws;
 }
-static void waltgov_fast_switch(struct waltgov_policy *wg_policy, u64 time,
+static inline void waltgov_fast_switch(struct waltgov_policy *wg_policy, u64 time,
 			      unsigned int next_freq)
 {
 	struct cpufreq_policy *policy = wg_policy->policy;
@@ -226,7 +226,7 @@ static void waltgov_fast_switch(struct waltgov_policy *wg_policy, u64 time,
 	}
 }
 
-static void waltgov_deferred_update(struct waltgov_policy *wg_policy, u64 time,
+static inline void waltgov_deferred_update(struct waltgov_policy *wg_policy, u64 time,
 				  unsigned int next_freq)
 {
 	if (use_pelt())
@@ -278,7 +278,7 @@ static inline unsigned long walt_map_util_freq(unsigned long util,
  * next_freq (as calculated above) is returned, subject to policy min/max and
  * cpufreq driver limitations.
  */
-static unsigned int get_next_freq(struct waltgov_policy *wg_policy,
+static inline unsigned int get_next_freq(struct waltgov_policy *wg_policy,
 				  unsigned long util, unsigned long max)
 {
 	struct cpufreq_policy *policy = wg_policy->policy;
@@ -315,7 +315,7 @@ static unsigned int get_next_freq(struct waltgov_policy *wg_policy,
 }
 
 #ifdef CONFIG_SCHED_WALT
-static unsigned long waltgov_get_util(struct waltgov_cpu *sg_cpu)
+static inline unsigned long waltgov_get_util(struct waltgov_cpu *sg_cpu)
 {
 	struct rq *rq = cpu_rq(sg_cpu->cpu);
 	unsigned long max = arch_scale_cpu_capacity(NULL, sg_cpu->cpu);
@@ -326,7 +326,7 @@ static unsigned long waltgov_get_util(struct waltgov_cpu *sg_cpu)
 	return stune_util(sg_cpu->cpu, 0, &sg_cpu->walt_load);
 }
 #else
-static unsigned long waltgov_get_util(struct waltgov_cpu *sg_cpu)
+static inline unsigned long waltgov_get_util(struct waltgov_cpu *sg_cpu)
 {
 	struct rq *rq = cpu_rq(sg_cpu->cpu);
 
@@ -348,7 +348,7 @@ static unsigned long waltgov_get_util(struct waltgov_cpu *sg_cpu)
 #define DEFAULT_HISPEED_LOAD 85
 #define DEFAULT_CPU0_RTG_BOOST_FREQ 1000000
 #define DEFAULT_CPU4_RTG_BOOST_FREQ 0
-static int find_target_boost(unsigned long util, struct waltgov_policy *wg_policy,
+static inline int find_target_boost(unsigned long util, struct waltgov_policy *wg_policy,
 				unsigned long *min_util)
 {
 	int i, ret;
@@ -371,7 +371,7 @@ static int find_target_boost(unsigned long util, struct waltgov_policy *wg_polic
 #define DEFAULT_TARGET_LOAD_THRESH 1024
 #define DEFAULT_TARGET_LOAD_SHIFT 4
 #ifdef CONFIG_SCHED_WALT
-static void waltgov_walt_adjust(struct waltgov_cpu *wg_cpu, unsigned long cpu_util,
+static inline void waltgov_walt_adjust(struct waltgov_cpu *wg_cpu, unsigned long cpu_util,
 				unsigned long nl, unsigned long *util,
 				unsigned long *max)
 {
@@ -427,7 +427,7 @@ static inline unsigned long target_util(struct waltgov_policy *wg_policy,
 	return util;
 }
 
-static void waltgov_update_single(struct update_util_data *hook, u64 time,
+static inline void waltgov_update_single(struct update_util_data *hook, u64 time,
 				unsigned int flags)
 {
 	struct waltgov_cpu *wg_cpu = container_of(hook, struct waltgov_cpu, update_util);
@@ -497,7 +497,7 @@ static void waltgov_update_single(struct update_util_data *hook, u64 time,
 	}
 }
 
-static unsigned int waltgov_next_freq_shared(struct waltgov_cpu *wg_cpu, u64 time)
+static inline unsigned int waltgov_next_freq_shared(struct waltgov_cpu *wg_cpu, u64 time)
 {
 	struct waltgov_policy *wg_policy = wg_cpu->wg_policy;
 	struct cpufreq_policy *policy = wg_policy->policy;
@@ -536,7 +536,7 @@ static unsigned int waltgov_next_freq_shared(struct waltgov_cpu *wg_cpu, u64 tim
 	return get_next_freq(wg_policy, util, max);
 }
 
-static void 
+static inline void 
 waltgov_update_freq(struct update_util_data *hook, u64 time,
 				unsigned int flags)
 {
@@ -583,7 +583,7 @@ waltgov_update_freq(struct update_util_data *hook, u64 time,
 	raw_spin_unlock(&wg_policy->update_lock);
 }
 
-static void waltgov_work(struct kthread_work *work)
+static inline void waltgov_work(struct kthread_work *work)
 {
 	struct waltgov_policy *wg_policy = container_of(work, struct waltgov_policy, work);
 	unsigned int freq;
@@ -602,7 +602,7 @@ static void waltgov_work(struct kthread_work *work)
 	mutex_unlock(&wg_policy->work_lock);
 }
 
-static void waltgov_irq_work(struct irq_work *irq_work)
+static inline void waltgov_irq_work(struct irq_work *irq_work)
 {
 	struct waltgov_policy *wg_policy;
 
@@ -613,7 +613,7 @@ static void waltgov_irq_work(struct irq_work *irq_work)
 
 /************************** sysfs interface ************************/
 
-static inline struct waltgov_tunables *to_waltgov_tunables(struct gov_attr_set *attr_set)
+static inline inline struct waltgov_tunables *to_waltgov_tunables(struct gov_attr_set *attr_set)
 {
 	return container_of(attr_set, struct waltgov_tunables, attr_set);
 }
@@ -625,7 +625,7 @@ static ssize_t rate_limit_us_show(struct gov_attr_set *attr_set, char *buf)
 	return sprintf(buf, "%u\n", tunables->rate_limit_us);
 }
 
-static ssize_t
+static inline ssize_t
 rate_limit_us_store(struct gov_attr_set *attr_set, const char *buf, size_t count)
 {
 	struct waltgov_tunables *tunables = to_waltgov_tunables(attr_set);
@@ -655,7 +655,7 @@ static ssize_t hispeed_load_show(struct gov_attr_set *attr_set, char *buf)
 	return scnprintf(buf, PAGE_SIZE, "%u\n", tunables->hispeed_load);
 }
 
-static ssize_t hispeed_load_store(struct gov_attr_set *attr_set,
+static inline ssize_t hispeed_load_store(struct gov_attr_set *attr_set,
 				  const char *buf, size_t count)
 {
 	struct waltgov_tunables *tunables = to_waltgov_tunables(attr_set);
@@ -675,7 +675,7 @@ static ssize_t hispeed_freq_show(struct gov_attr_set *attr_set, char *buf)
 	return scnprintf(buf, PAGE_SIZE, "%u\n", tunables->hispeed_freq);
 }
 
-static ssize_t hispeed_freq_store(struct gov_attr_set *attr_set,
+static inline ssize_t hispeed_freq_store(struct gov_attr_set *attr_set,
 					const char *buf, size_t count)
 {
 	struct waltgov_tunables *tunables = to_waltgov_tunables(attr_set);
@@ -706,7 +706,7 @@ static ssize_t rtg_boost_freq_show(struct gov_attr_set *attr_set, char *buf)
 	return scnprintf(buf, PAGE_SIZE, "%u\n", tunables->rtg_boost_freq);
 }
 
-static ssize_t rtg_boost_freq_store(struct gov_attr_set *attr_set,
+static inline ssize_t rtg_boost_freq_store(struct gov_attr_set *attr_set,
 				    const char *buf, size_t count)
 {
 	struct waltgov_tunables *tunables = to_waltgov_tunables(attr_set);
@@ -737,7 +737,7 @@ static ssize_t pl_show(struct gov_attr_set *attr_set, char *buf)
 	return scnprintf(buf, PAGE_SIZE, "%u\n", tunables->pl);
 }
 
-static ssize_t pl_store(struct gov_attr_set *attr_set, const char *buf,
+static inline ssize_t pl_store(struct gov_attr_set *attr_set, const char *buf,
 				   size_t count)
 {
 	struct waltgov_tunables *tunables = to_waltgov_tunables(attr_set);
@@ -829,7 +829,7 @@ static ssize_t target_loads_show(struct gov_attr_set *attr_set, char *buf)
 	return ret;
 }
 
-static ssize_t target_loads_store(struct gov_attr_set *attr_set, const char *buf,
+static inline ssize_t target_loads_store(struct gov_attr_set *attr_set, const char *buf,
 				   size_t count)
 {
 	int i;
@@ -872,7 +872,7 @@ static ssize_t boost_show(struct gov_attr_set *attr_set, char *buf)
 	return scnprintf(buf, PAGE_SIZE, "%d\n", tunables->boost);
 }
 
-static ssize_t boost_store(struct gov_attr_set *attr_set, const char *buf,
+static inline ssize_t boost_store(struct gov_attr_set *attr_set, const char *buf,
 				   size_t count)
 {
 	struct waltgov_tunables *tunables = to_waltgov_tunables(attr_set);
@@ -904,7 +904,7 @@ static ssize_t exp_util_show(struct gov_attr_set *attr_set, char *buf)
 	return scnprintf(buf, PAGE_SIZE, "%u\n", tunables->exp_util);
 }
 
-static ssize_t exp_util_store(struct gov_attr_set *attr_set, const char *buf,
+static inline ssize_t exp_util_store(struct gov_attr_set *attr_set, const char *buf,
 				   size_t count)
 {
 	struct waltgov_tunables *tunables = to_waltgov_tunables(attr_set);
@@ -920,14 +920,14 @@ static struct governor_attr _name =					\
 __ATTR(_name, 0644, show_##_name, store_##_name)			\
 
 #define show_attr(name)							\
-static ssize_t show_##name(struct gov_attr_set *attr_set, char *buf)	\
+static inline ssize_t show_##name(struct gov_attr_set *attr_set, char *buf)	\
 {									\
 	struct waltgov_tunables *tunables = to_waltgov_tunables(attr_set);	\
 	return scnprintf(buf, PAGE_SIZE, "%lu\n", tunables->name);	\
 }									\
 
 #define store_attr(name)						\
-static ssize_t store_##name(struct gov_attr_set *attr_set,		\
+static inline ssize_t store_##name(struct gov_attr_set *attr_set,		\
 				const char *buf, size_t count)		\
 {									\
 	struct waltgov_tunables *tunables = to_waltgov_tunables(attr_set);	\
@@ -976,7 +976,7 @@ static struct kobj_type waltgov_tunables_ktype = {
 
 static struct cpufreq_governor walt_gov;
 
-static struct waltgov_policy *waltgov_policy_alloc(struct cpufreq_policy *policy)
+static inline struct waltgov_policy *waltgov_policy_alloc(struct cpufreq_policy *policy)
 {
 	struct waltgov_policy *wg_policy;
 
@@ -989,12 +989,12 @@ static struct waltgov_policy *waltgov_policy_alloc(struct cpufreq_policy *policy
 	return wg_policy;
 }
 
-static void waltgov_policy_free(struct waltgov_policy *wg_policy)
+static inline void waltgov_policy_free(struct waltgov_policy *wg_policy)
 {
 	kfree(wg_policy);
 }
 
-static int waltgov_kthread_create(struct waltgov_policy *wg_policy)
+static inline int waltgov_kthread_create(struct waltgov_policy *wg_policy)
 {
 	struct task_struct *thread;
 	struct sched_param param = { .sched_priority = MAX_USER_RT_PRIO / 2 };
@@ -1035,7 +1035,7 @@ static int waltgov_kthread_create(struct waltgov_policy *wg_policy)
 	return 0;
 }
 
-static void waltgov_kthread_stop(struct waltgov_policy *wg_policy)
+static inline void waltgov_kthread_stop(struct waltgov_policy *wg_policy)
 {
 	/* kthread only required for slow path */
 	if (wg_policy->policy->fast_switch_enabled)
@@ -1046,7 +1046,7 @@ static void waltgov_kthread_stop(struct waltgov_policy *wg_policy)
 	mutex_destroy(&wg_policy->work_lock);
 }
 
-static int waltgov_init(struct cpufreq_policy *policy)
+static inline int waltgov_init(struct cpufreq_policy *policy)
 {
 	struct waltgov_policy *wg_policy;
 	struct waltgov_tunables *tunables;
@@ -1124,7 +1124,7 @@ disable_fast_switch:
 	return ret;
 }
 
-static void waltgov_exit(struct cpufreq_policy *policy)
+static inline void waltgov_exit(struct cpufreq_policy *policy)
 {
 	struct waltgov_policy *wg_policy = policy->governor_data;
 	struct waltgov_tunables *tunables = wg_policy->tunables;
@@ -1141,7 +1141,7 @@ static void waltgov_exit(struct cpufreq_policy *policy)
 	cpufreq_disable_fast_switch(policy);
 }
 
-static int waltgov_start(struct cpufreq_policy *policy)
+static inline int waltgov_start(struct cpufreq_policy *policy)
 {
 	struct waltgov_policy *wg_policy = policy->governor_data;
 	unsigned int cpu;
@@ -1175,7 +1175,7 @@ static int waltgov_start(struct cpufreq_policy *policy)
 	return 0;
 }
 
-static void waltgov_stop(struct cpufreq_policy *policy)
+static inline void waltgov_stop(struct cpufreq_policy *policy)
 {
 	struct waltgov_policy *wg_policy = policy->governor_data;
 	unsigned int cpu;
@@ -1190,7 +1190,7 @@ static void waltgov_stop(struct cpufreq_policy *policy)
 		kthread_cancel_work_sync(&wg_policy->work);
 	}
 }
-static void waltgov_limits(struct cpufreq_policy *policy)
+static inline void waltgov_limits(struct cpufreq_policy *policy)
 {
 	struct waltgov_policy *wg_policy = policy->governor_data;
 	unsigned long flags, now;

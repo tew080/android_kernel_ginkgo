@@ -51,7 +51,7 @@ enum {
 	R_COPY_SAFE_2X = (R_COPY_MIN << 1) - 1
 };
 
-static bool out_non_repeat(
+static inline bool out_non_repeat(
 	const uint8_t **in_at,
 	uint8_t **out_at,
 	uint_fast32_t nr_bytes_max,
@@ -86,7 +86,7 @@ static bool out_non_repeat(
 	return true;
 }
 
-static void out_repeat_overlap(
+static inline void out_repeat_overlap(
 	uint_fast32_t offset,
 	uint8_t *out_at,
 	const uint8_t *out_from,
@@ -110,7 +110,7 @@ static void out_repeat_overlap(
 	while_lt_copy_2x_as_x2(out_at, out_from, out_copy_end, R_COPY_MIN);
 }
 
-static bool out_repeat_slow(
+static inline bool out_repeat_slow(
 	uint_fast32_t r_bytes_max,
 	uint_fast32_t offset,
 	uint8_t *out_at,
@@ -134,7 +134,7 @@ static bool out_repeat_slow(
 	return true;
 }
 
-static int decode(
+static inline int decode(
 	const uint8_t *in_at,
 	uint8_t *const out,
 	const uint8_t *const in_end,
@@ -193,7 +193,7 @@ static int decode(
 	return in_at == in_end ? (int)(out_at - out) : LZ4K_STATUS_FAILED;
 }
 
-static int decode_pattern_4kb(
+static inline int decode_pattern_4kb(
 	const uint8_t *const in,
 	uint8_t *const out,
 	const uint8_t *const out_end)
@@ -206,7 +206,7 @@ static int decode_pattern_4kb(
 	return (uint8_t*)o64 == out_end ? (int)(out_end - out) : LZ4K_STATUS_FAILED;
 }
 
-static int decode_4kb(
+static inline int decode_4kb(
 	const uint8_t *const in,
 	uint8_t *const out,
 	const uint8_t *const in_end,
@@ -215,7 +215,7 @@ static int decode_4kb(
 	return decode(in, out, in_end, out_end, NR_4KB_LOG2, BLOCK_4KB_LOG2);
 }
 
-int lz4kd_decode(
+int inline lz4kd_decode(
 	const void *in,
 	void *const out,
 	unsigned in_max,

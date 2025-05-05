@@ -74,7 +74,7 @@ inline static uint8_t *out_utag_then_bytes_left(
 	return out_size_bytes(out_at + TAG_BYTES_MAX, bytes_left);
 }
 
-static int out_tail(
+static inline int out_tail(
 	uint8_t *out_at,
 	uint8_t *const out_end,
 	const uint8_t *const out,
@@ -167,7 +167,7 @@ inline static uint8_t *out_r_bytes_left(
 		out_at : out_size_bytes(out_at, r_bytes_max - REPEAT_MIN - r_mask);
 }
 
-static uint8_t *out_repeat(
+static inline uint8_t *out_repeat(
 	uint8_t *out_at,
 	uint_fast32_t utag,
 	uint_fast32_t r_bytes_max,
@@ -229,7 +229,7 @@ uint8_t *lz4kd_out_tuple(
 				nr_log2, off_log2);
 }
 
-static const uint8_t *repeat_end(
+static inline const uint8_t *repeat_end(
 	const uint8_t *q,
 	const uint8_t *r,
 	const uint8_t *const in_end_safe,
@@ -290,7 +290,7 @@ inline static uint_fast32_t hash(const uint8_t *r)
  * as average of two nearest square roots, see STEP_LIMIT above.
  */
 
-static int encode_any(
+static inline int encode_any(
 	uint16_t *const ht,
 	const uint8_t *const in0,
 	const uint8_t *const in_end,
@@ -348,7 +348,7 @@ int lz4kd_encode_fast(
 	return encode_any((uint16_t*)state, in, in + in_max, out, out + out_max);
 }
 
-int lz4kd_encode(
+int inline lz4kd_encode(
 	void *const state,
 	const void *const in,
 	void *out,
