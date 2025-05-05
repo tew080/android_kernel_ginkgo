@@ -283,7 +283,8 @@ static unsigned int get_next_freq(struct waltgov_policy *wg_policy,
 {
 	struct cpufreq_policy *policy = wg_policy->policy;
 	unsigned int freq;
- 
+	unsigned int idx, l_freq, h_freq;
+	
 	if (arch_scale_freq_invariant())
 		freq = policy->cpuinfo.max_freq;
 	else
@@ -292,8 +293,6 @@ static unsigned int get_next_freq(struct waltgov_policy *wg_policy,
 		 * the current one before the CPU is fully busy:
 		 */
 		freq = policy->cur + (policy->cur >> 2);
-
-	unsigned int idx, l_freq, h_freq;
 	freq = (freq + (freq >> 2)) * util / max;
 
 	if (freq == wg_policy->cached_raw_freq && !wg_policy->need_freq_update)
@@ -384,7 +383,6 @@ static void waltgov_walt_adjust(struct waltgov_cpu *wg_cpu, unsigned long cpu_ut
 	bool is_hiload;
 	unsigned long min_util;
 	int target_boost;
-	unsigned long pl = wg_cpu->walt_load.pl;
 
 	if (use_pelt())
 		return;
@@ -585,8 +583,6 @@ waltgov_update_freq(struct update_util_data *hook, u64 time,
 		else
 			waltgov_deferred_update(wg_policy, time, next_f);
 	}
-
-out:
 	raw_spin_unlock(&wg_policy->update_lock);
 }
 

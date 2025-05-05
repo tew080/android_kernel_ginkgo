@@ -670,7 +670,7 @@ CFLAGS_PGO_CLANG := -fprofile-generate
 export CFLAGS_PGO_CLANG
 
 ifeq ($(CONFIG_PGO_GEN),y)
-CFLAGS_GCOV := -fprofile-generate
+CFLAGS_GCOV := -fprofile-generate -fkernel-pgo
 else
 CFLAGS_GCOV := --coverage
 endif
@@ -988,7 +988,7 @@ endif
 
 ifdef CONFIG_LTO_CLANG
 ifdef CONFIG_THINLTO
-lto-clang-flags	:= -flto=thin
+lto-clang-flags	:= -flto=full
 ifeq ($(ld-name),lld)
 LDFLAGS		+= --thinlto-cache-dir=.thinlto-cache
 else
