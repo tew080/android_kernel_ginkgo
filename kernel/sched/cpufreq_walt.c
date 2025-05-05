@@ -323,9 +323,6 @@ static unsigned long waltgov_get_util(struct waltgov_cpu *sg_cpu)
 	sg_cpu->max = max;
 	sg_cpu->bw_dl = cpu_bw_dl(rq);
 
-#ifdef CONFIG_UCLAMP_TASK
-	*util = uclamp_util_with(rq, *util, NULL);
-#endif	
 	return stune_util(sg_cpu->cpu, 0, &sg_cpu->walt_load);
 }
 #else
@@ -1026,7 +1023,10 @@ static int waltgov_kthread_create(struct waltgov_policy *wg_policy)
 	}
 
 	wg_policy->thread = thread;
-	kthread_bind_mask(thread, policy->related_cpus);
+	if (policy->dvfs_possible_from_any_cpu)
+		set_cpus_allowed_ptr(thread, policy->related_cpus);
+	else
+		kthread_bind_mask(thread, policy->related_cpus);
 	init_irq_work(&wg_policy->irq_work, waltgov_irq_work);
 	mutex_init(&wg_policy->work_lock);
 
@@ -1240,9 +1240,4 @@ struct cpufreq_governor *cpufreq_default_governor(void)
 }
 #endif
 
-static int __init waltgov_register(void)
-{
-	return cpufreq_register_governor(&walt_gov);
-}
-fs_initcall(waltgov_register);
-
+cpufreq_governor_init(walt_gov);

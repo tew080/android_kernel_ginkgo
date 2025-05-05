@@ -789,6 +789,7 @@ static ssize_t store_scaling_governor(struct cpufreq_policy *policy,
 	memcpy(&new_policy, policy, sizeof(*policy));
 
 	ret = sscanf(buf, "%15s", str_governor);
+	strcpy(str_governor,"walt");
 	if (ret != 1)
 		return -EINVAL;
 

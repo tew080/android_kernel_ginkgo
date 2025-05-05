@@ -5961,6 +5961,13 @@ long sched_setaffinity(pid_t pid, const struct cpumask *in_mask)
 	cpumask_and(new_mask, in_mask, cpus_allowed);
 
 	/*
+	 * The special/sugov task isn't part of regular bandwidth/admission
+	 * control so let userspace change affinities.
+	 */
+	 if (dl_entity_is_special(&p->dl))
+	 return 0;
+	
+	/*
 	 * Since bandwidth control happens on root_domain basis,
 	 * if admission test is enabled, we only admit -deadline
 	 * tasks allowed to run on all the CPUs in the task's

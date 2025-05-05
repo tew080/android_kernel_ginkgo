@@ -267,6 +267,17 @@ struct dl_bandwidth {
 	u64 dl_period;
 };
 
+#define SCHED_FLAG_SUGOV	0x10000000
+
+static inline bool dl_entity_is_special(const struct sched_dl_entity *dl_se)
+{
+#ifdef CONFIG_CPU_FREQ_GOV_WALT
+	return unlikely(dl_se->flags & SCHED_FLAG_SUGOV);
+#else
+	return false;
+#endif
+}
+
 static inline int dl_bandwidth_enabled(void)
 {
 	return sysctl_sched_rt_runtime >= 0;
@@ -2687,7 +2698,7 @@ static inline bool uclamp_is_used(void)
 #endif /* CONFIG_UCLAMP_TASK */
 
 #ifdef CONFIG_UCLAMP_TASK_GROUP
-static inline void sched_uclamp_enable(void) {}
+//static inline void sched_uclamp_enable(void) {}
 static inline bool uclamp_latency_sensitive(struct task_struct *p)
 {
 	struct cgroup_subsys_state *css = task_css(p, cpuset_cgrp_id);
