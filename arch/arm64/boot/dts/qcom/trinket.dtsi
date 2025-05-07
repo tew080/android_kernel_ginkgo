@@ -432,7 +432,7 @@
 					dev = "/dev/block/platform/soc/4744000.sdhci/by-name/vendor";
 					type = "ext4";
 					mnt_flags = "ro,barrier=1,discard";
-					fsmgr_flags = "wait,avb";
+					fsmgr_flags = "wait";
 					status = "ok";
 				};
 				persist {
@@ -2574,7 +2574,7 @@
 		reg-names = "base", "global_base";
 		interrupts = <GIC_SPI 421 IRQ_TYPE_LEVEL_HIGH>;
 		qcom,mport = <0>;
-		qcom,hw-timer-hz = <19200000>;
+		qcom,hw-timer-hz = <21200000>;
 		qcom,target-dev = <&cpu_cpu_ddr_bw>;
 		qcom,count-unit = <0x10000>;
 	};
