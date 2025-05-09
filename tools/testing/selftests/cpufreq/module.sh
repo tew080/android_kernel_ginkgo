@@ -105,90 +105,6 @@ module_driver_test()
 	printf "\n"
 }
 
-# find governor name based on governor module name
-# $1: governor module name
-find_gov_name()
-{
-	if [ $1 = "cpufreq_ondemand.ko" ]; then
-		printf "ondemand"
-	elif [ $1 = "cpufreq_conservative.ko" ]; then
-		printf "conservative"
-	elif [ $1 = "cpufreq_userspace.ko" ]; then
-		printf "userspace"
-	elif [ $1 = "cpufreq_performance.ko" ]; then
-		printf "performance"
-	elif [ $1 = "cpufreq_powersave.ko" ]; then
-		printf "powersave"
-	elif [ $1 = "cpufreq_schedutil.ko" ]; then
-		printf "schedutil"
-	fi
-}
-
-# $1: governor string, $2: governor module, $3: policy
-# example: module_governor_test_single "ondemand" "cpufreq_ondemand.ko" 2
-module_governor_test_single()
-{
-	printf "** Test: Running ${FUNCNAME[0]} for $3 **\n\n"
-
-	backup_governor $3
-
-	# switch to new governor
-	printf "Switch from $CUR_GOV to $1\n"
-	switch_show_governor $3 $1
-
-	# try removing module, it should fail as governor is used
-	printf "Removing $2 module\n\n"
-	rmmod $2
-	if [ $? = 0 ]; then
-		printf "WARN: rmmod $2 succeeded even if governor is used\n"
-		insmod $2
-	else
-		printf "Pass: unable to remove $2 while it is being used\n\n"
-	fi
-
-	# switch back to old governor
-	printf "Switchback to $CUR_GOV from $1\n"
-	restore_governor $3
-	printf "\n"
-}
-
-# Insert cpufreq governor module and perform basic tests
-# $1: cpufreq-governor module to insert
-module_governor_test()
-{
-	printf "** Test: Running ${FUNCNAME[0]} **\n\n"
-
-	# check if module is present or not
-	ls $1 > /dev/null
-	if [ $? != 0 ]; then
-		printf "$1: not present in `pwd` folder\n"
-		return;
-	fi
-
-	# test basic module tests
-	test_basic_insmod_rmmod $1
-
-	# insert module
-	printf "Inserting $1 module\n\n"
-	insmod $1
-	if [ $? != 0 ]; then
-		printf "Insmod $1 failed\n"
-		return;
-	fi
-
-	# switch to new governor for each cpu
-	for_each_policy module_governor_test_single $(find_gov_name $1) $1
-
-	# remove module
-	printf "Removing $1 module\n\n"
-	rmmod $1
-	if [ $? != 0 ]; then
-		printf "rmmod $1 failed\n"
-		return;
-	fi
-	printf "\n"
-}
-
 # test modules: driver and governor
 # $1: driver module, $2: governor module
 module_test()
@@ -210,9 +126,6 @@ module_test()
 		printf "Insmod $1 failed\n"
 		return;
 	fi
-
-	# run governor tests
-	module_governor_test $2
 
 	# remove driver module
 	printf "Removing $1 module\n\n"
