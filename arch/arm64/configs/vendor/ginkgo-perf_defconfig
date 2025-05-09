@@ -5865,3 +5865,11 @@ CONFIG_SCHED_CASS=y
 ######
 ## end CASS (Capacity Aware Superset Scheduler)
 ######
+
+#####
+## SCHED BORE 
+######
+CONFIG_SCHED_BORE=y
+######
+## end SCHED BORE 
+######
