@@ -10,4 +10,3 @@ config TOUCHSCREEN_NT36xxx_HOSTDL_SPI_C3J
 	  to your system by SPI bus.
 
 	  If unsure, say N.
-
