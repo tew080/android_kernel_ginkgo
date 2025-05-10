@@ -116,14 +116,14 @@
 		qcom,no-status-check-on-disable;
 		qcom,gds-timeout = <500>;
 		qcom,clk-dis-wait-val = <8>;
-		status = "disabled";
+		status = "ok";
 	};
 
 	gpu_gx_gdsc: qcom,gdsc@599100c {
 		compatible = "qcom,gdsc";
 		regulator-name = "gpu_gx_gdsc";
 		reg = <0x599100c 0x4>;
-		status = "disabled";
+		status = "ok";
 	};
 
 	/* GDSCs in Video CC */
