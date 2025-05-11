@@ -5888,3 +5888,14 @@ CONFIG_DRM_FRAME_BOOST_TIMEOUT=3250
 ######
 ## end DRM Frame BOOST
 ######
+
+######
+# UClamp Scheduler tunables
+######
+CONFIG_UCLAMP_TASK=y
+CONFIG_UCLAMP_BUCKETS_COUNT=20
+CONFIG_UCLAMP_TASK_GROUP=y
+CONFIG_UCLAMP_ASSIST=y
+######
+## end UClamp Scheduler tunables
+######
