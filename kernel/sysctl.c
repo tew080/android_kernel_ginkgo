@@ -424,6 +424,7 @@ static struct ctl_table kern_table[] = {
 		.extra2		= &two_million,
 	},
 #else
+#if 0
 	{
 		.procname	= "sched_boost",
 		.data		= &sysctl_sched_boost,
@@ -433,6 +434,7 @@ static struct ctl_table kern_table[] = {
 		.extra1		= &neg_three,
 		.extra2		= &three,
 	},
+#endif
 #endif
 	{
 		.procname	= "sched_upmigrate",
