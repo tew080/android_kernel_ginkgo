@@ -59,7 +59,7 @@ static struct boost_drv boost_drv_g __read_mostly = {
 	.boost_waitq = __WAIT_QUEUE_HEAD_INITIALIZER(boost_drv_g.boost_waitq)
 };
 
-static inline unsigned int get_input_boost_freq(struct cpufreq_policy *policy)
+static unsigned int get_input_boost_freq(struct cpufreq_policy *policy)
 {
 	unsigned int freq;
 
@@ -71,7 +71,7 @@ static inline unsigned int get_input_boost_freq(struct cpufreq_policy *policy)
 	return min(freq, policy->max);
 }
 
-static inline unsigned int get_min_freq(struct cpufreq_policy *policy)
+static unsigned int get_min_freq(struct cpufreq_policy *policy)
 {
 	unsigned int freq;
 
@@ -83,7 +83,7 @@ static inline unsigned int get_min_freq(struct cpufreq_policy *policy)
 	return max(freq, policy->min);
 }
 
-static  inline unsigned int get_max_boost_freq(struct cpufreq_policy *policy)
+static unsigned int get_max_boost_freq(struct cpufreq_policy *policy)
 {
 	unsigned int freq;
 
@@ -111,7 +111,7 @@ static void update_online_cpu_policy(void)
 	put_online_cpus();
 }
 
-inline bool cpu_input_boost_within_input(unsigned long timeout_ms)
+bool cpu_input_boost_within_input(unsigned long timeout_ms)
 {
 	struct boost_drv *b = &boost_drv_g;
 
@@ -119,7 +119,7 @@ inline bool cpu_input_boost_within_input(unsigned long timeout_ms)
 			   msecs_to_jiffies(timeout_ms));
 }
 
-static void __cpu_input_boost_kick(struct boost_drv *b)
+void __cpu_input_boost_kick(struct boost_drv *b)
 {
 	if (test_bit(SCREEN_OFF, &b->state))
 		return;
@@ -137,7 +137,7 @@ void inline cpu_input_boost_kick(void)
 	__cpu_input_boost_kick(b);
 }
 
-static inline void __cpu_input_boost_kick_max(struct boost_drv *b,
+static void __cpu_input_boost_kick_max(struct boost_drv *b,
 				       unsigned int duration_ms)
 {
 	unsigned long boost_jiffies = msecs_to_jiffies(duration_ms);
@@ -162,14 +162,14 @@ static inline void __cpu_input_boost_kick_max(struct boost_drv *b,
 		wake_up(&b->boost_waitq);
 }
 
-void inline cpu_input_boost_kick_max(unsigned int duration_ms)
+void cpu_input_boost_kick_max(unsigned int duration_ms)
 {
 	struct boost_drv *b = &boost_drv_g;
 
 	__cpu_input_boost_kick_max(b, duration_ms);
 }
 
-static inline void input_unboost_worker(struct work_struct *work)
+static void input_unboost_worker(struct work_struct *work)
 {
 	struct boost_drv *b = container_of(to_delayed_work(work),
 					   typeof(*b), input_unboost);
@@ -178,7 +178,7 @@ static inline void input_unboost_worker(struct work_struct *work)
 	wake_up(&b->boost_waitq);
 }
 
-static inline void max_unboost_worker(struct work_struct *work)
+static void max_unboost_worker(struct work_struct *work)
 {
 	struct boost_drv *b = container_of(to_delayed_work(work),
 					   typeof(*b), max_unboost);
@@ -187,7 +187,7 @@ static inline void max_unboost_worker(struct work_struct *work)
 	wake_up(&b->boost_waitq);
 }
 
-static inline int cpu_boost_thread(void *data)
+static int cpu_boost_thread(void *data)
 {
 	static const struct sched_param sched_max_rt_prio = {
 		.sched_priority = MAX_RT_PRIO - 1
@@ -271,7 +271,7 @@ static int msm_drm_notifier_cb(struct notifier_block *nb, unsigned long action,
 	return NOTIFY_OK;
 }
 
-static inline void cpu_input_boost_input_event(struct input_handle *handle,
+static void cpu_input_boost_input_event(struct input_handle *handle,
 					unsigned int type, unsigned int code,
 					int value)
 {
@@ -282,7 +282,7 @@ static inline void cpu_input_boost_input_event(struct input_handle *handle,
 	b->last_input_jiffies = jiffies;
 }
 
-static inline int cpu_input_boost_input_connect(struct input_handler *handler,
+static int cpu_input_boost_input_connect(struct input_handler *handler,
 					 struct input_dev *dev,
 					 const struct input_device_id *id)
 {
