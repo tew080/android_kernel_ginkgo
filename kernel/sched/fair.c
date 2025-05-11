@@ -7671,7 +7671,9 @@ static inline int find_best_target(struct task_struct *p, int *backup_cpu,
 	bool next_group_higher_cap = false;
 	int isolated_candidate = -1;
 	int max_cap_orig_cpu = cpu_rq(6)->rd->max_cap_orig_cpu;
+#ifdef CONFIG_SCHED_TUNE
 	struct task_struct *curr_tsk;
+#endif /* CONFIG_SCHED_TUNE */
 	bool boosted = fbt_env->boosted;
 
 	*backup_cpu = -1;
@@ -8099,6 +8101,7 @@ static inline int find_best_target(struct task_struct *p, int *backup_cpu,
 	 *   a) ACTIVE CPU: target_cpu
 	 *   b) IDLE CPU: best_idle_cpu
 	 */
+#ifdef CONFIG_SCHED_TUNE
 	if (target_cpu != -1 && !idle_cpu(target_cpu) &&
 			best_idle_cpu != -1) {
 		curr_tsk = READ_ONCE(cpu_rq(target_cpu)->curr);
@@ -8106,6 +8109,7 @@ static inline int find_best_target(struct task_struct *p, int *backup_cpu,
 			target_cpu = best_idle_cpu;
 		}
 	}
+#endif /* CONFIG_SCHED_TUNE */
 
 	if (target_cpu == -1)
 		target_cpu = prefer_idle

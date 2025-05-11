@@ -120,11 +120,6 @@ extern int sysctl_nr_trim_pages;
 static int sixty = 60;
 #endif
 
-#ifdef CONFIG_DYNAMIC_STUNE_BOOST
-static int boost_slot_ta;
-static int boost_slot_fg;
-#endif
-
 static int __maybe_unused neg_one = -1;
 static int __maybe_unused neg_three = -3;
 
@@ -3521,22 +3516,6 @@ int sched_boost_handler(struct ctl_table *table, int write,
 		return ret;
 
 	pr_debug("%s set sb to %i\n", current->comm, *data);
-
-#ifdef CONFIG_DYNAMIC_STUNE_BOOST
-	if (is_battery_saver_on())
-		return ret;
-
-	if (*data == 1) {
-		do_stune_boost("top-app", 20, &boost_slot_ta);
-		do_stune_boost("foreground", 5, &boost_slot_fg);
-	} else if (*data == 3) {
-		do_stune_boost("top-app", 10, &boost_slot_ta);
-		do_stune_boost("foreground", 1, &boost_slot_fg);
-	} else {
-		reset_stune_boost("top-app", boost_slot_ta);
-		reset_stune_boost("foreground", boost_slot_fg);
-	}
-#endif
 
 	return ret;
 }
