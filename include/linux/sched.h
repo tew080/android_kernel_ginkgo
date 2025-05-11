@@ -334,16 +334,16 @@ struct vtime {
 };
 
 /*
- * Utilization clamp constraints.
- * @UCLAMP_MIN:	Minimum utilization
- * @UCLAMP_MAX:	Maximum utilization
- * @UCLAMP_CNT:	Utilization clamp constraints count
- */
- enum uclamp_id {
+* Utilization clamp constraints.
+* @UCLAMP_MIN:	Minimum utilization
+* @UCLAMP_MAX:	Maximum utilization
+* @UCLAMP_CNT:	Utilization clamp constraints count
+*/
+enum uclamp_id {
 	UCLAMP_MIN = 0,
 	UCLAMP_MAX,
 	UCLAMP_CNT
-}
+};
 
 struct sched_info {
 #ifdef CONFIG_SCHED_INFO
@@ -375,6 +375,10 @@ struct sched_info {
  */
 # define SCHED_FIXEDPOINT_SHIFT		10
 # define SCHED_FIXEDPOINT_SCALE		(1L << SCHED_FIXEDPOINT_SHIFT)
+
+/* Increase resolution of cpu_capacity calculations */
+# define SCHED_CAPACITY_SHIFT		SCHED_FIXEDPOINT_SHIFT
+# define SCHED_CAPACITY_SCALE		(1L << SCHED_CAPACITY_SHIFT)
 
 struct load_weight {
 	unsigned long			weight;

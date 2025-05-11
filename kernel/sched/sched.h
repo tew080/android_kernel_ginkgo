@@ -880,6 +880,10 @@ struct rq {
 #ifdef CONFIG_NO_HZ_FULL
 	unsigned long last_sched_tick;
 #endif
+	/* capture load from *all* tasks on this cpu: */
+	struct load_weight load;
+	unsigned long nr_load_updates;
+	u64 nr_switches;
 #ifdef CONFIG_UCLAMP_TASK
 	/* Utilization clamp values based on CPU's RUNNABLE tasks */
 	struct uclamp_rq	uclamp[UCLAMP_CNT] ____cacheline_aligned;
@@ -2658,6 +2662,7 @@ static inline bool uclamp_is_used(void)
 	return static_branch_likely(&sched_uclamp_used);
 }
 
+#if 0
 /*
  * Enabling static branches would get the cpus_read_lock(),
  * check whether uclamp_is_used before enable it to avoid always
@@ -2669,6 +2674,7 @@ static inline void sched_uclamp_enable(void)
 	if (!uclamp_is_used())
 		static_branch_enable(&sched_uclamp_used);
 }
+#endif
 
 /**
  * uclamp_rq_util_with - clamp @util with @rq and @p effective uclamp values.

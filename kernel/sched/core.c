@@ -8236,8 +8236,6 @@ capacity_from_percent(char *buf)
 	return req;
 }
 
-<<<<<<< HEAD
-=======
 #ifdef CONFIG_UCLAMP_ASSIST
 static void cpu_uclamp_write_wrapper(struct cgroup_subsys_state *css, char *buf,
 					enum uclamp_id clamp_id)
@@ -8272,7 +8270,6 @@ static void cpu_uclamp_write_wrapper(struct cgroup_subsys_state *css, char *buf,
 }
 #endif
 
->>>>>>> e52908485d53c (sched/uclamp: Optimize sched_uclamp_used static key enabling)
 static ssize_t cpu_uclamp_write(struct kernfs_open_file *of, char *buf,
 				size_t nbytes, loff_t off,
 				enum uclamp_id clamp_id)
