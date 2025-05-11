@@ -106,7 +106,7 @@ static int cass_best_cpu(struct task_struct *p, int prev_cpu, bool sync)
 	struct cpuidle_state *idle_state;
 	bool has_idle = false;
 	unsigned long p_util;
-	int cidx = 0, cpu;
+	int cidx = 0, cpu = 0, p_cpu = task_cpu(p);
 
 	/* Get the utilization for this task */
 	p_util = task_util_est(p);
@@ -157,7 +157,7 @@ static int cass_best_cpu(struct task_struct *p, int prev_cpu, bool sync)
 		 * find what this CPU's relative utilization would look like
 		 * if @p were on it.
 		 */
-		if (cpu != task_cpu(p))
+		if (cpu != p_cpu)
 			curr->util += p_util;
 
 		/*
