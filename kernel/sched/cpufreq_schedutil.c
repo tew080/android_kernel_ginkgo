@@ -83,7 +83,7 @@ static DEFINE_PER_CPU(struct sugov_tunables *, cached_tunables);
 
 /************************ Governor internals ***********************/
 
-static bool sugov_should_update_freq(struct sugov_policy *sg_policy, u64 time)
+static inline bool sugov_should_update_freq(struct sugov_policy *sg_policy, u64 time)
 {
 	s64 delta_ns;
 
@@ -125,7 +125,7 @@ static bool sugov_should_update_freq(struct sugov_policy *sg_policy, u64 time)
 	return delta_ns >= sg_policy->min_rate_limit_ns;
 }
 
-static bool sugov_up_down_rate_limit(struct sugov_policy *sg_policy, u64 time,
+static inline bool sugov_up_down_rate_limit(struct sugov_policy *sg_policy, u64 time,
 				     unsigned int next_freq)
 {
 	s64 delta_ns;
@@ -152,7 +152,7 @@ static inline bool use_pelt(void)
 #endif
 }
 
-static bool sugov_update_next_freq(struct sugov_policy *sg_policy, u64 time,
+static inline bool sugov_update_next_freq(struct sugov_policy *sg_policy, u64 time,
 				   unsigned int next_freq)
 {
 	if (sg_policy->next_freq == next_freq)
@@ -176,7 +176,7 @@ static bool sugov_update_next_freq(struct sugov_policy *sg_policy, u64 time,
 	return true;
 }
 
-static void sugov_fast_switch(struct sugov_policy *sg_policy, u64 time,
+static inline void sugov_fast_switch(struct sugov_policy *sg_policy, u64 time,
 			      unsigned int next_freq)
 {
 	struct cpufreq_policy *policy = sg_policy->policy;
@@ -191,7 +191,7 @@ static void sugov_fast_switch(struct sugov_policy *sg_policy, u64 time,
 	policy->cur = next_freq;
 }
 
-static void sugov_deferred_update(struct sugov_policy *sg_policy, u64 time,
+static inline void sugov_deferred_update(struct sugov_policy *sg_policy, u64 time,
 				  unsigned int next_freq)
 {
 	if (!sugov_update_next_freq(sg_policy, time, next_freq))
@@ -224,7 +224,7 @@ static void sugov_deferred_update(struct sugov_policy *sg_policy, u64 time,
  * next_freq (as calculated above) is returned, subject to policy min/max and
  * cpufreq driver limitations.
  */
-static unsigned int get_next_freq(struct sugov_policy *sg_policy,
+static inline unsigned int get_next_freq(struct sugov_policy *sg_policy,
 				  unsigned long util, unsigned long max)
 {
 	struct cpufreq_policy *policy = sg_policy->policy;
@@ -254,7 +254,7 @@ static unsigned int get_next_freq(struct sugov_policy *sg_policy,
 	return l_freq;
 }
 
-static void sugov_get_util(unsigned long *util, unsigned long *max, int cpu,
+static inline void sugov_get_util(unsigned long *util, unsigned long *max, int cpu,
 			   u64 time)
 {
 	struct rq *rq = cpu_rq(cpu);
@@ -282,7 +282,7 @@ static void sugov_get_util(unsigned long *util, unsigned long *max, int cpu,
 }
 
 #ifdef CONFIG_NO_HZ_COMMON
-static bool sugov_cpu_is_busy(struct sugov_cpu *sg_cpu)
+static inline bool sugov_cpu_is_busy(struct sugov_cpu *sg_cpu)
 {
 	unsigned long idle_calls = tick_nohz_get_idle_calls_cpu(sg_cpu->cpu);
 	bool ret = idle_calls == sg_cpu->saved_idle_calls;
@@ -294,7 +294,7 @@ static bool sugov_cpu_is_busy(struct sugov_cpu *sg_cpu)
 static inline bool sugov_cpu_is_busy(struct sugov_cpu *sg_cpu) { return false; }
 #endif /* CONFIG_NO_HZ_COMMON */
 
-static void sugov_update_single(struct update_util_data *hook, u64 time,
+static inline void sugov_update_single(struct update_util_data *hook, u64 time,
 				unsigned int flags)
 {
 	struct sugov_cpu *sg_cpu = container_of(hook, struct sugov_cpu, update_util);
@@ -348,7 +348,7 @@ static void sugov_update_single(struct update_util_data *hook, u64 time,
 	}
 }
 
-static unsigned int sugov_next_freq_shared(struct sugov_cpu *sg_cpu, u64 time)
+static inline unsigned int sugov_next_freq_shared(struct sugov_cpu *sg_cpu, u64 time)
 {
 	struct sugov_policy *sg_policy = sg_cpu->sg_policy;
 	struct cpufreq_policy *policy = sg_policy->policy;
@@ -377,7 +377,7 @@ static unsigned int sugov_next_freq_shared(struct sugov_cpu *sg_cpu, u64 time)
 	return get_next_freq(sg_policy, util, max);
 }
 
-static void sugov_update_shared(struct update_util_data *hook, u64 time,
+static inline void sugov_update_shared(struct update_util_data *hook, u64 time,
 				unsigned int flags)
 {
 	struct sugov_cpu *sg_cpu = container_of(hook, struct sugov_cpu, update_util);
@@ -417,7 +417,7 @@ static void sugov_update_shared(struct update_util_data *hook, u64 time,
 	raw_spin_unlock(&sg_policy->update_lock);
 }
 
-static void sugov_work(struct kthread_work *work)
+static inline void sugov_work(struct kthread_work *work)
 {
 	struct sugov_policy *sg_policy = container_of(work, struct sugov_policy, work);
 	unsigned int freq;
@@ -443,7 +443,7 @@ static void sugov_work(struct kthread_work *work)
 	mutex_unlock(&sg_policy->work_lock);
 }
 
-static void sugov_irq_work(struct irq_work *irq_work)
+static inline void sugov_irq_work(struct irq_work *irq_work)
 {
 	struct sugov_policy *sg_policy;
 
@@ -477,7 +477,7 @@ static inline struct sugov_tunables *to_sugov_tunables(struct gov_attr_set *attr
 
 static DEFINE_MUTEX(min_rate_lock);
 
-static void update_min_rate_limit_ns(struct sugov_policy *sg_policy)
+static inline void update_min_rate_limit_ns(struct sugov_policy *sg_policy)
 {
 	mutex_lock(&min_rate_lock);
 	sg_policy->min_rate_limit_ns = min(sg_policy->up_rate_delay_ns,
@@ -485,21 +485,21 @@ static void update_min_rate_limit_ns(struct sugov_policy *sg_policy)
 	mutex_unlock(&min_rate_lock);
 }
 
-static ssize_t up_rate_limit_us_show(struct gov_attr_set *attr_set, char *buf)
+static inline ssize_t up_rate_limit_us_show(struct gov_attr_set *attr_set, char *buf)
 {
 	struct sugov_tunables *tunables = to_sugov_tunables(attr_set);
 
 	return sprintf(buf, "%u\n", tunables->up_rate_limit_us);
 }
 
-static ssize_t down_rate_limit_us_show(struct gov_attr_set *attr_set, char *buf)
+static inline ssize_t down_rate_limit_us_show(struct gov_attr_set *attr_set, char *buf)
 {
 	struct sugov_tunables *tunables = to_sugov_tunables(attr_set);
 
 	return sprintf(buf, "%u\n", tunables->down_rate_limit_us);
 }
 
-static ssize_t up_rate_limit_us_store(struct gov_attr_set *attr_set,
+static inline ssize_t up_rate_limit_us_store(struct gov_attr_set *attr_set,
 				      const char *buf, size_t count)
 {
 	struct sugov_tunables *tunables = to_sugov_tunables(attr_set);
@@ -522,7 +522,7 @@ static ssize_t up_rate_limit_us_store(struct gov_attr_set *attr_set,
 	return count;
 }
 
-static ssize_t down_rate_limit_us_store(struct gov_attr_set *attr_set,
+static inline ssize_t down_rate_limit_us_store(struct gov_attr_set *attr_set,
 					const char *buf, size_t count)
 {
 	struct sugov_tunables *tunables = to_sugov_tunables(attr_set);
@@ -563,7 +563,7 @@ static struct kobj_type sugov_tunables_ktype = {
 
 static struct cpufreq_governor schedutil_gov;
 
-static struct sugov_policy *sugov_policy_alloc(struct cpufreq_policy *policy)
+static inline struct sugov_policy *sugov_policy_alloc(struct cpufreq_policy *policy)
 {
 	struct sugov_policy *sg_policy;
 
@@ -576,12 +576,12 @@ static struct sugov_policy *sugov_policy_alloc(struct cpufreq_policy *policy)
 	return sg_policy;
 }
 
-static void sugov_policy_free(struct sugov_policy *sg_policy)
+static inline void sugov_policy_free(struct sugov_policy *sg_policy)
 {
 	kfree(sg_policy);
 }
 
-static int sugov_kthread_create(struct sugov_policy *sg_policy)
+static inline int sugov_kthread_create(struct sugov_policy *sg_policy)
 {
 	struct task_struct *thread;
 	struct sched_param param = { .sched_priority = MAX_USER_RT_PRIO - 1 };
@@ -623,7 +623,7 @@ static int sugov_kthread_create(struct sugov_policy *sg_policy)
 	return 0;
 }
 
-static void sugov_kthread_stop(struct sugov_policy *sg_policy)
+static inline void sugov_kthread_stop(struct sugov_policy *sg_policy)
 {
 	/* kthread only required for slow path */
 	if (sg_policy->policy->fast_switch_enabled)
@@ -634,7 +634,7 @@ static void sugov_kthread_stop(struct sugov_policy *sg_policy)
 	mutex_destroy(&sg_policy->work_lock);
 }
 
-static struct sugov_tunables *sugov_tunables_alloc(struct sugov_policy *sg_policy)
+static inline struct sugov_tunables *sugov_tunables_alloc(struct sugov_policy *sg_policy)
 {
 	struct sugov_tunables *tunables;
 
@@ -647,7 +647,7 @@ static struct sugov_tunables *sugov_tunables_alloc(struct sugov_policy *sg_polic
 	return tunables;
 }
 
-static void sugov_tunables_save(struct cpufreq_policy *policy,
+static inline void sugov_tunables_save(struct cpufreq_policy *policy,
 		struct sugov_tunables *tunables)
 {
 	int cpu;
@@ -669,7 +669,7 @@ static void sugov_tunables_save(struct cpufreq_policy *policy,
 	cached->down_rate_limit_us = tunables->down_rate_limit_us;
 }
 
-static void sugov_tunables_free(struct sugov_tunables *tunables)
+static inline void sugov_tunables_free(struct sugov_tunables *tunables)
 {
 	if (!have_governor_per_policy())
 		global_tunables = NULL;
@@ -677,7 +677,7 @@ static void sugov_tunables_free(struct sugov_tunables *tunables)
 	kfree(tunables);
 }
 
-static void sugov_tunables_restore(struct cpufreq_policy *policy)
+static inline void sugov_tunables_restore(struct cpufreq_policy *policy)
 {
 	struct sugov_policy *sg_policy = policy->governor_data;
 	struct sugov_tunables *tunables = sg_policy->tunables;
@@ -691,7 +691,7 @@ static void sugov_tunables_restore(struct cpufreq_policy *policy)
 	update_min_rate_limit_ns(sg_policy);
 }
 
-static int sugov_init(struct cpufreq_policy *policy)
+static inline int sugov_init(struct cpufreq_policy *policy)
 {
 	struct sugov_policy *sg_policy;
 	struct sugov_tunables *tunables;
@@ -773,7 +773,7 @@ disable_fast_switch:
 	return ret;
 }
 
-static void sugov_exit(struct cpufreq_policy *policy)
+static inline void sugov_exit(struct cpufreq_policy *policy)
 {
 	struct sugov_policy *sg_policy = policy->governor_data;
 	struct sugov_tunables *tunables = sg_policy->tunables;
@@ -795,7 +795,7 @@ static void sugov_exit(struct cpufreq_policy *policy)
 	cpufreq_disable_fast_switch(policy);
 }
 
-static int sugov_start(struct cpufreq_policy *policy)
+static inline int sugov_start(struct cpufreq_policy *policy)
 {
 	struct sugov_policy *sg_policy = policy->governor_data;
 	unsigned int cpu;
@@ -831,7 +831,7 @@ static int sugov_start(struct cpufreq_policy *policy)
 	return 0;
 }
 
-static void sugov_stop(struct cpufreq_policy *policy)
+static inline void sugov_stop(struct cpufreq_policy *policy)
 {
 	struct sugov_policy *sg_policy = policy->governor_data;
 	unsigned int cpu;
@@ -847,7 +847,7 @@ static void sugov_stop(struct cpufreq_policy *policy)
 	}
 }
 
-static void sugov_limits(struct cpufreq_policy *policy)
+static inline void sugov_limits(struct cpufreq_policy *policy)
 {
 	struct sugov_policy *sg_policy = policy->governor_data;
 	unsigned long flags;
