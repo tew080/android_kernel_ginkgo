@@ -5913,3 +5913,12 @@ CONFIG_MIN_FREQ_PERF=902400
 ## end CPU INPUT BOOST Driver
 ######
 
+######
+# LRU (Least Recently Used memory management mechanism)
+######
+CONFIG_LRU_GEN=y
+CONFIG_LRU_GEN_ENABLED=y
+# CONFIG_LRU_GEN_STATS is not set
+######
+## end LRU (Least Recently Used memory management mechanism)
+######
