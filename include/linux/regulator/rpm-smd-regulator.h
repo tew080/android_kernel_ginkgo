@@ -39,6 +39,7 @@ enum rpm_regulator_voltage_corner {
 	RPM_REGULATOR_CORNER_SUPER_TURBO,
 };
 
+#if 0
 /**
  * enum rpm_regulator_voltage_level - possible voltage level values
  *
@@ -62,6 +63,24 @@ enum rpm_regulator_voltage_level {
 	RPM_REGULATOR_LEVEL_TURBO_NO_CPR	= 416,
 	RPM_REGULATOR_LEVEL_BINNING		= 512,
 	RPM_REGULATOR_LEVEL_MAX			= 65535,
+};
+#endif
+
+/* custom regulator table undervolt*/
+enum rpm_regulator_voltage_level {
+	RPM_REGULATOR_LEVEL_NONE		= 0,
+	RPM_REGULATOR_LEVEL_RETENTION		= 8,
+	RPM_REGULATOR_LEVEL_RETENTION_PLUS	= 16,
+	RPM_REGULATOR_LEVEL_MIN_SVS		= 32,
+	RPM_REGULATOR_LEVEL_LOW_SVS		= 48,
+	RPM_REGULATOR_LEVEL_SVS			= 64,
+	RPM_REGULATOR_LEVEL_SVS_PLUS		= 128,
+	RPM_REGULATOR_LEVEL_NOM			= 192,
+	RPM_REGULATOR_LEVEL_NOM_PLUS		= 256,
+	RPM_REGULATOR_LEVEL_TURBO		= 320,
+	RPM_REGULATOR_LEVEL_TURBO_NO_CPR	= 384,
+	RPM_REGULATOR_LEVEL_BINNING		= 416,
+	RPM_REGULATOR_LEVEL_MAX			= 65534,
 };
 
 /**
