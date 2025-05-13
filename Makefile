@@ -753,8 +753,8 @@ INLINE_FLAGS += -finline-functions -mllvm -enable-pipeliner \
 		-mllvm -enable-loop-distribute \
 		-mllvm -enable-loopinterchange \
 		-mllvm -enable-machine-outliner=never \
-		-mllvm -inline-threshold=4000 \
-		-mllvm -inlinehint-threshold=3000 \
+		-mllvm -inline-threshold=400 \
+		-mllvm -inlinehint-threshold=300 \
 		-mllvm -unroll-runtime \
 		-mllvm -unroll-count=4 \
 		-mllvm -unroll-threshold=900 \
