@@ -39,29 +39,21 @@ enum rpm_regulator_voltage_corner {
 	RPM_REGULATOR_CORNER_SUPER_TURBO,
 };
 
-/**
- * enum rpm_regulator_voltage_level - possible voltage level values
- *
- * These should be used in regulator_set_voltage() and
- * rpm_regulator_set_voltage() calls for level type regulators as if they had
- * units of uV.
- *
- * Note: the meaning of level values is set by the RPM.
- */
+/* custom regulator table undervolt*/
 enum rpm_regulator_voltage_level {
 	RPM_REGULATOR_LEVEL_NONE		= 0,
-	RPM_REGULATOR_LEVEL_RETENTION		= 16,
-	RPM_REGULATOR_LEVEL_RETENTION_PLUS	= 32,
-	RPM_REGULATOR_LEVEL_MIN_SVS		= 48,
-	RPM_REGULATOR_LEVEL_LOW_SVS		= 64,
-	RPM_REGULATOR_LEVEL_SVS			= 128,
-	RPM_REGULATOR_LEVEL_SVS_PLUS		= 192,
-	RPM_REGULATOR_LEVEL_NOM			= 256,
-	RPM_REGULATOR_LEVEL_NOM_PLUS		= 320,
-	RPM_REGULATOR_LEVEL_TURBO		= 384,
-	RPM_REGULATOR_LEVEL_TURBO_NO_CPR	= 416,
-	RPM_REGULATOR_LEVEL_BINNING		= 512,
-	RPM_REGULATOR_LEVEL_MAX			= 65535,
+	RPM_REGULATOR_LEVEL_RETENTION		= 8,
+	RPM_REGULATOR_LEVEL_RETENTION_PLUS	= 16,
+	RPM_REGULATOR_LEVEL_MIN_SVS		= 32,
+	RPM_REGULATOR_LEVEL_LOW_SVS		= 48,
+	RPM_REGULATOR_LEVEL_SVS			= 64,
+	RPM_REGULATOR_LEVEL_SVS_PLUS		= 128,
+	RPM_REGULATOR_LEVEL_NOM			= 192,
+	RPM_REGULATOR_LEVEL_NOM_PLUS		= 256,
+	RPM_REGULATOR_LEVEL_TURBO		= 320,
+	RPM_REGULATOR_LEVEL_TURBO_NO_CPR	= 384,
+	RPM_REGULATOR_LEVEL_BINNING		= 416,
+	RPM_REGULATOR_LEVEL_MAX			= 65534,
 };
 
 /**
