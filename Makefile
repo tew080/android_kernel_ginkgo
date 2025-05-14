@@ -687,12 +687,8 @@ ARCH_AFLAGS :=
 ARCH_CFLAGS :=
 include arch/$(SRCARCH)/Makefile
 
-KBUILD_CFLAGS += -fno-stack-protector
-KBUILD_CFLAGS += -fno-asynchronous-unwind-tables
-
 ifdef CONFIG_LLVM_POLLY
 POLLY_FLAGS := -mllvm -polly \
-		-mllvm -polly-run-dce \
 		-mllvm -polly-invariant-load-hoisting \
 		-mllvm -polly-optimized-scops \
 		-mllvm -polly-vectorizer=stripmine \
@@ -727,20 +723,10 @@ KBUILD_CFLAGS	+= $(call cc-disable-warning, attribute-alias)
 ifdef CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE
 KBUILD_CFLAGS   += -O2
 else ifdef CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE_O3
-KBUILD_CFLAGS   += -O3
+KBUILD_CFLAGS   += -O3 -ffp-contract=fast -ffast-math
 else ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS   += -Os
 endif # CONFIG_CC_OPTIMIZE_FOR_SIZE
-
-# Low latency CPU reaction & scheduling
-KBUILD_CFLAGS += -mllvm -enable-post-misched
-KBUILD_CFLAGS += -fno-stack-protector         
-KBUILD_CFLAGS += -fno-asynchronous-unwind-tables
-
-# Increase the speed of mathematical calculations
-KBUILD_CFLAGS += -ffp-contract=fast -ffast-math -fno-trapping-math \
-                 -fno-math-errno -freciprocal-math -fassociative-math \
-                 -funsafe-math-optimizations -fno-rounding-math
 
 # Snapdragon optimization
 KBUILD_CFLAGS	+=  -mcpu=cortex-a73 -mtune=cortex-a73
