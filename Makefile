@@ -697,8 +697,10 @@ POLLY_FLAGS := -mllvm -polly \
 		-mllvm -polly-run-inliner \
 		-mllvm -polly-loopfusion-greedy=1 \
 		-mllvm -polly-num-threads=0 \
-		-mllvm -polly-detect-keep-going
- 
+		-mllvm -polly-detect-keep-going \
+		-mllvm -polly-ast-use-context \
+		-mllvm -polly-scheduling=dynamic 
+
 KBUILD_CFLAGS += $(POLLY_FLAGS)
 KBUILD_AFLAGS += $(POLLY_FLAGS)
 KBUILD_LDFLAGS += $(POLLY_FLAGS)
@@ -731,6 +733,7 @@ endif # CONFIG_CC_OPTIMIZE_FOR_SIZE
 # Snapdragon optimization
 KBUILD_CFLAGS	+=  -mcpu=cortex-a73 -mtune=cortex-a73
 KBUILD_CFLAGS   +=  -march=armv8-a+fp+simd+crc+crypto 
+KBUILD_CFLAGS   +=  -mfpu=neon-fp-armv8 -mfloat-abi=hard
 
 # Inlin optimization
 ifdef CONFIG_INLINE_OPTIMIZATION
@@ -740,6 +743,7 @@ INLINE_FLAGS := -finline-functions \
 		-mllvm -enable-pipeliner \
 		-mllvm -enable-loop-distribute \
 		-mllvm -enable-loopinterchange \
+		-mllvm -enable-loop-flatten \
 		-mllvm -enable-machine-outliner=never \
 		-mllvm -unroll-runtime \
 		-mllvm -unroll-count=6 \
