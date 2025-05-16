@@ -5926,9 +5926,9 @@ CONFIG_LRU_GEN_ENABLED=y
 ######
 ## Sysctl knobs for protecting the working set
 ######
-CONFIG_ANON_MIN_KBYTES=32768
-CONFIG_CLEAN_LOW_KBYTES=65536
-CONFIG_CLEAN_MIN_KBYTES=16384
+CONFIG_ANON_MIN_KBYTES=196608
+CONFIG_CLEAN_LOW_KBYTES=393216
+CONFIG_CLEAN_MIN_KBYTES=196608
 ######
 ## end of  Sysctl knobs for protecting the working set
 ######
