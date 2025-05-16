@@ -687,12 +687,8 @@ ARCH_AFLAGS :=
 ARCH_CFLAGS :=
 include arch/$(SRCARCH)/Makefile
 
-KBUILD_CFLAGS += -fno-stack-protector
-KBUILD_CFLAGS += -fno-asynchronous-unwind-tables
-
 ifdef CONFIG_LLVM_POLLY
 POLLY_FLAGS := -mllvm -polly \
-		-mllvm -polly-run-dce \
 		-mllvm -polly-invariant-load-hoisting \
 		-mllvm -polly-optimized-scops \
 		-mllvm -polly-vectorizer=stripmine \
@@ -701,19 +697,13 @@ POLLY_FLAGS := -mllvm -polly \
 		-mllvm -polly-run-inliner \
 		-mllvm -polly-loopfusion-greedy=1 \
 		-mllvm -polly-num-threads=0 \
-		-mllvm -polly-detect-keep-going
+		-mllvm -polly-detect-keep-going \
+		-mllvm -polly-ast-use-context \
+		-mllvm -polly-scheduling=dynamic 
  
 KBUILD_CFLAGS += $(POLLY_FLAGS)
 KBUILD_AFLAGS += $(POLLY_FLAGS)
 KBUILD_LDFLAGS += $(POLLY_FLAGS)
-
-# Polly may optimise loops with dead paths beyound what the linker
-# can understand. This may negate the effect of the linker's DCE
-# so we tell Polly to perfom proven DCE on the loops it optimises
-# in order to preserve the overall effect of the linker's DCE.
-ifdef CONFIG_LD_DEAD_CODE_DATA_ELIMINATION
-KBUILD_CFLAGS	+= -mllvm -polly-run-dce
-endif
 endif # CONFIG_LLVM_POLLY
 
 KBUILD_CFLAGS	+= $(call cc-option,-fno-delete-null-pointer-checks,)
@@ -727,24 +717,15 @@ KBUILD_CFLAGS	+= $(call cc-disable-warning, attribute-alias)
 ifdef CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE
 KBUILD_CFLAGS   += -O2
 else ifdef CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE_O3
-KBUILD_CFLAGS   += -O3
+KBUILD_CFLAGS   += -O3 -ffp-contract=fast -ffast-math
 else ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS   += -Os
 endif # CONFIG_CC_OPTIMIZE_FOR_SIZE
 
-# Low latency CPU reaction & scheduling
-KBUILD_CFLAGS += -mllvm -enable-post-misched
-KBUILD_CFLAGS += -fno-stack-protector         
-KBUILD_CFLAGS += -fno-asynchronous-unwind-tables
-
-# Increase the speed of mathematical calculations
-KBUILD_CFLAGS += -ffp-contract=fast -ffast-math -fno-trapping-math \
-                 -fno-math-errno -freciprocal-math -fassociative-math \
-                 -funsafe-math-optimizations -fno-rounding-math
-
 # Snapdragon optimization
 KBUILD_CFLAGS	+=  -mcpu=cortex-a73 -mtune=cortex-a73
 KBUILD_CFLAGS   +=  -march=armv8-a+fp+simd+crc+crypto 
+KBUILD_CFLAGS   +=  -mfpu=neon-fp-armv8 -mfloat-abi=hard
 
 # Inlin optimization
 ifdef CONFIG_INLINE_OPTIMIZATION
@@ -754,6 +735,7 @@ INLINE_FLAGS := -finline-functions \
 		-mllvm -enable-pipeliner \
 		-mllvm -enable-loop-distribute \
 		-mllvm -enable-loopinterchange \
+		-mllvm -enable-loop-flatten \
 		-mllvm -enable-machine-outliner=never \
 		-mllvm -unroll-runtime \
 		-mllvm -unroll-count=6 \
