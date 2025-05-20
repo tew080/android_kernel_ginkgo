@@ -140,7 +140,7 @@ int msm_bus_axi_portunhalt(int master_port);
 static inline int __init msm_bus_fabric_init_driver(void) { return 0; }
 static struct msm_bus_client_handle dummy_cl;
 
-bool msm_bus_scale_driver_ready(void)
+static inline bool msm_bus_scale_driver_ready(void)
 {
 	return true;
 }
