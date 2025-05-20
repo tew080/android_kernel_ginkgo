@@ -33,7 +33,6 @@
 #include <linux/tick.h>
 #include <linux/sched/topology.h>
 #include <linux/sched/sysctl.h>
-#include <linux/battery_saver.h>
 #include <linux/binfmts.h>
 
 #include <trace/events/power.h>

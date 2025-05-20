@@ -18,7 +18,6 @@
 #include <linux/slab.h>
 #include <trace/events/power.h>
 #include <linux/sched/sysctl.h>
-#include <linux/battery_saver.h>
 #include <linux/binfmts.h>
 #include "sched.h"
 
