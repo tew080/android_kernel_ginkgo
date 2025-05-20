@@ -5880,14 +5880,6 @@ CONFIG_SBALANCE_EXCLUDE_CPUS=6,7
 ######
 
 ######
-# DRM Frame BOOST
-######
-CONFIG_DRM_FRAME_BOOST_TIMEOUT=3250
-######
-## end DRM Frame BOOST
-######
-
-######
 # UClamp Scheduler tunables
 ######
 CONFIG_UCLAMP_TASK=y
