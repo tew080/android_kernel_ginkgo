@@ -2250,7 +2250,7 @@ int drm_mode_atomic_ioctl(struct drm_device *dev,
 
 	if (!(arg->flags & DRM_MODE_ATOMIC_TEST_ONLY))
 		if (df_boost_within_input(3250))
-			devfreq_boost_kick(DEVFREQ_CPU_LLCC_DDR_BW);
+			devfreq_boost_kick(DEVFREQ_CPU_CPU_DDR_BW);
 
 	drm_modeset_acquire_init(&ctx, 0);
 
