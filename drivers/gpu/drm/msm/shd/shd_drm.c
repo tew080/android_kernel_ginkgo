@@ -836,7 +836,7 @@ static int shd_drm_obj_init(struct shd_display *display)
 	kthread_init_worker(&priv->disp_thread[i].worker);
 	priv->disp_thread[i].dev = dev;
 	priv->disp_thread[i].thread =
-		kthread_run(kthread_worker_fn,
+		kthread_run_perf_critical(cpu_perf_mask, kthread_worker_fn,
 			&priv->disp_thread[i].worker,
 			"crtc_commit:%d", priv->disp_thread[i].crtc_id);
 	if (IS_ERR(priv->disp_thread[i].thread)) {
@@ -849,7 +849,7 @@ static int shd_drm_obj_init(struct shd_display *display)
 	kthread_init_worker(&priv->event_thread[i].worker);
 	priv->event_thread[i].dev = dev;
 	priv->event_thread[i].thread =
-		kthread_run(kthread_worker_fn,
+		kthread_run_perf_critical(cpu_perf_mask, kthread_worker_fn,
 			&priv->event_thread[i].worker,
 			"crtc_event:%d", priv->event_thread[i].crtc_id);
 	if (IS_ERR(priv->event_thread[i].thread)) {
