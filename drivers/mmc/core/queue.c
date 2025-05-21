@@ -443,7 +443,7 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
 			/* hook for pm qos cmdq init */
 			if (card->host->cmdq_ops->init)
 				card->host->cmdq_ops->init(card->host);
-			mq->thread = kthread_run(mmc_cmdq_thread, mq,
+			mq->thread = kthread_run_perf_critical(cpu_perf_mask, mmc_cmdq_thread, mq,
 						 "mmc-cmdqd/%d%s",
 						 host->index,
 						 subname ? subname : "");
@@ -490,7 +490,7 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
 
 	sema_init(&mq->thread_sem, 1);
 
-	mq->thread = kthread_run(mmc_queue_thread, mq, "mmcqd/%d%s",
+	mq->thread = kthread_run_perf_critical(cpu_perf_mask, mmc_queue_thread, mq, "mmcqd/%d%s",
 		host->index, subname ? subname : "");
 
 	if (IS_ERR(mq->thread)) {
