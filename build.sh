@@ -49,11 +49,14 @@ make -j$(nproc --all) $MAKE_PARAMS
 
 if [[ $1 = "-k" || $1 = "--kpm" ]]; then
    rm -rf out/arch/arm64/boot/Image.gz-dtb
-   rm -rf out/arch/arm64/boot/Image.gz Image.gz-dtb
+   rm -rf out/arch/arm64/boot/Image.gz 
+   rm -rf out/arch/arm64/boot/oImage.gz
    cp patch_linux out/arch/arm64/boot/
    cd out/arch/arm64/boot/
    chmod +x patch_linux
    ./patch_linux
+   rm -f Image
+   mv oImage Image
    gzip -n -f -9 -k Image Image.gz
    cat Image.gz dts/qcom/*.dtb > Image.gz-dtb
    cd -
@@ -61,7 +64,7 @@ else
    rm -rf out/arch/arm64/boot/Image.gz-dtb
    rm -rf out/arch/arm64/boot/Image.gz Image.gz-dtb
    cd out/arch/arm64/boot/
-   gzip -k Image Image.gz
+   gzip -n -f -9 -k Image Image.gz
    cat Image.gz dts/qcom/*.dtb > Image.gz-dtb
    cd -
 fi
