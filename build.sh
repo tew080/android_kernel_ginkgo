@@ -13,16 +13,16 @@ DEFCONFIG="vendor/ginkgo-perf_defconfig"
 export PATH="${TC_DIR}/bin:${GCC_64_DIR}/bin:${GCC_32_DIR}/bin:/usr/bin:${PATH}"
 
 if [[ $1 = "-r" || $1 = "--regen" ]]; then
-make O=out ARCH=arm64 $DEFCONFIG savedefconfig
-cp out/defconfig arch/arm64/configs/$DEFCONFIG
-exit
+   make O=out ARCH=arm64 $DEFCONFIG savedefconfig
+   cp out/defconfig arch/arm64/configs/$DEFCONFIG
+   exit
 fi
 
 if [[ $1 = "-c" || $1 = "--clean" ]]; then
-make clean
-make mrproper
-rm -rf out
-rm -rf *.zip
+   make clean
+   make mrproper
+   rm -rf out
+   rm -rf *.zip
 fi
 
 MAKE_PARAMS="O=out \
@@ -39,13 +39,32 @@ MAKE_PARAMS="O=out \
    CROSS_COMPILE=$GCC_64_DIR/bin/aarch64-linux-android- \
    CROSS_COMPILE_ARM32=$GCC_32_DIR/bin/arm-linux-androideabi- \
    CLANG_TRIPLE=aarch64-linux-gnu- \
-   Image.gz-dtb dtbo.img"
+   Image dtbo.img"
 
 mkdir -p out
 make O=out ARCH=arm64 $DEFCONFIG
 
 echo -e "\nStarting compilation...\n"
 make -j$(nproc --all) $MAKE_PARAMS
+
+if [[ $1 = "-k" || $1 = "--kpm" ]]; then
+   rm -rf out/arch/arm64/boot/Image.gz-dtb
+   rm -rf out/arch/arm64/boot/Image.gz Image.gz-dtb
+   cp patch_linux out/arch/arm64/boot/
+   cd out/arch/arm64/boot/
+   chmod +x patch_linux
+   ./patch_linux
+   gzip -n -f -9 -k Image Image.gz
+   cat Image.gz dts/qcom/*.dtb > Image.gz-dtb
+   cd -
+else
+   rm -rf out/arch/arm64/boot/Image.gz-dtb
+   rm -rf out/arch/arm64/boot/Image.gz Image.gz-dtb
+   cd out/arch/arm64/boot/
+   gzip -k Image Image.gz
+   cat Image.gz dts/qcom/*.dtb > Image.gz-dtb
+   cd -
+fi
 
 kernel="out/arch/arm64/boot/Image.gz-dtb"
 dtbo="out/arch/arm64/boot/dtbo.img"
@@ -57,6 +76,7 @@ fi
 
 rm -rf AnyKernel3/Image.gz-dtb
 rm -rf AnyKernel3/dtbo.img
+
 
 cp $kernel AnyKernel3
 cp $dtbo AnyKernel3
