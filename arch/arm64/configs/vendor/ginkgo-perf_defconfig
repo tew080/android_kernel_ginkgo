@@ -5935,4 +5935,11 @@ CONFIG_CLEAN_MIN_KBYTES=196608
 ## end of  Sysctl knobs for protecting the working set
 ######
 
+######
+## oplus memory management hacks
+######
+CONFIG_OPLUS_MM_HACKS=y
+######
+## end of oplus memory management hacks
+######
 
