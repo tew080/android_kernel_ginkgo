@@ -5,7 +5,7 @@
 
 SECONDS=0 # builtin bash timer
 ZIPNAME="ERROR-Q3-ginkgo-KSU-Next+SuSFS-$(date '+%Y%m%d-%H%M').zip"
-TC_DIR="/home/tew/kernel/clang-r547379"
+TC_DIR="/home/tew/kernel/Clang-20.0.0git-20250129"
 GCC_64_DIR="/home/tew/kernel/aarch64-linux-android-4.9"
 GCC_32_DIR="/home/tew/kernel/arm-linux-androideabi-4.9"
 DEFCONFIG="vendor/ginkgo-perf_defconfig"
@@ -50,21 +50,20 @@ make -j$(nproc --all) $MAKE_PARAMS
 if [[ $1 = "-k" || $1 = "--kpm" ]]; then
    rm -rf out/arch/arm64/boot/Image.gz-dtb
    rm -rf out/arch/arm64/boot/Image.gz 
-   rm -rf out/arch/arm64/boot/oImage.gz
-   cp patch_linux out/arch/arm64/boot/
    cd out/arch/arm64/boot/
+   curl -LO https://raw.githubusercontent.com/Numbersf/Action-Build/main/patch_linux
    chmod +x patch_linux
-   ./patch_linux
+   ./patch_linux 2>&1 | tee patch_log.txt
    rm -f Image
    mv oImage Image
-   gzip -n -f -9 -k Image Image.gz
+   gzip -k Image Image.gz
    cat Image.gz dts/qcom/*.dtb > Image.gz-dtb
    cd -
 else
    rm -rf out/arch/arm64/boot/Image.gz-dtb
    rm -rf out/arch/arm64/boot/Image.gz Image.gz-dtb
    cd out/arch/arm64/boot/
-   gzip -n -f -9 -k Image Image.gz
+   gzip -k Image Image.gz
    cat Image.gz dts/qcom/*.dtb > Image.gz-dtb
    cd -
 fi
@@ -89,3 +88,4 @@ zip -r9 "../$ZIPNAME" * -x .git README.md *placeholder
 cd ..
 echo -e "\nCompleted in $((SECONDS / 60)) minute(s) and $((SECONDS % 60)) second(s) !"
 echo "Zip: $ZIPNAME"
+
