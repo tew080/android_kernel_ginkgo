@@ -1715,8 +1715,11 @@ static const struct file_operations vmstat_file_operations = {
 
 #ifdef CONFIG_SMP
 static DEFINE_PER_CPU(struct delayed_work, vmstat_work);
+#ifdef CONFIG_GINKGO
 int sysctl_stat_interval __read_mostly = 10 * HZ;
-
+#else
+int sysctl_stat_interval __read_mostly = 30 * HZ;
+#endif
 #ifdef CONFIG_PROC_FS
 static void refresh_vm_stats(struct work_struct *work)
 {

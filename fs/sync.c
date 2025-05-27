@@ -19,7 +19,11 @@
 #include <linux/backing-dev.h>
 #include "internal.h"
 
+#ifdef CONFIG_GINKGO
+bool fsync_enabled = false;
+#else
 bool fsync_enabled = true;
+#endif
 module_param(fsync_enabled, bool, 0644);
 
 #define VALID_FLAGS (SYNC_FILE_RANGE_WAIT_BEFORE|SYNC_FILE_RANGE_WRITE| \

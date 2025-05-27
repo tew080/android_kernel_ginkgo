@@ -65,7 +65,11 @@
 #include "trace/lowmemorykiller.h"
 
 /* to enable lowmemorykiller */
+#ifdef CONFIG_GINKGO
+static int enable_lmk = 0;
+#else
 static int enable_lmk = 1;
+#endif
 module_param_named(enable_lmk, enable_lmk, int, 0644);
 
 static u32 lowmem_debug_level = 1;

@@ -54,7 +54,11 @@ static int tcp_use_userconfig_max = 1;
 static int one_day_secs = 24 * 3600;
 
 /* obsolete */
+#ifdef CONFIG_GINKGO
+static int sysctl_tcp_low_latency __read_mostly = 1;
+#else
 static int sysctl_tcp_low_latency __read_mostly;
+#endif
 
 /* Update system visible IP port range */
 static void set_local_port_range(struct net *net, int range[2])

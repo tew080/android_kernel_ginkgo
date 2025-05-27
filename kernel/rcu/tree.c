@@ -628,14 +628,7 @@ void rcu_idle_enter(void)
  */
 void rcu_user_enter(void)
 {
-	struct rcu_data *rdp = this_cpu_ptr(&rcu_data);
-
 	lockdep_assert_irqs_disabled();
-
-	instrumentation_begin();
-	do_nocb_deferred_wakeup(rdp);
-	instrumentation_end();
-
 	rcu_eqs_enter(true);
 }
 #endif /* CONFIG_NO_HZ_FULL */
