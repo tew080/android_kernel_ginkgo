@@ -165,7 +165,11 @@ void blk_queue_make_request(struct request_queue *q, make_request_fn *mfn)
 	/*
 	 * set defaults
 	 */
+#ifdef CONFIG_GINKGO
+	q->nr_requests = 512;
+#else
 	q->nr_requests = BLKDEV_MAX_RQ;
+#endif
 
 	q->make_request_fn = mfn;
 	blk_queue_dma_alignment(q, 511);

@@ -3318,7 +3318,11 @@ EXPORT_SYMBOL(kmem_cache_alloc_bulk);
  * take the list_lock.
  */
 static int slub_min_order;
+#ifdef CONFIG_GINKGO
+static int slub_max_order;
+#else
 static int slub_max_order = PAGE_ALLOC_COSTLY_ORDER;
+#endif
 static int slub_min_objects;
 
 /*

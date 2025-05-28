@@ -9,7 +9,11 @@
 #include <linux/export.h>
 #include <linux/nospec.h>
 
+#ifdef CONFIG_GINKGO
 unsigned int __read_mostly sysctl_sched_autogroup_enabled = 0;
+#else
+unsigned int __read_mostly sysctl_sched_autogroup_enabled = 1;
+#endif
 static struct autogroup autogroup_default;
 static atomic_t autogroup_seq_nr;
 

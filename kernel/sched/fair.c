@@ -151,8 +151,11 @@ static unsigned int sched_nr_latency = 6;
  * After fork, child runs first. If set to 0 (default) then
  * parent will (try to) run first.
  */
+#ifdef CONFIG_GINKGO
+unsigned int sysctl_sched_child_runs_first __read_mostly = 0;
+#else
 unsigned int sysctl_sched_child_runs_first __read_mostly = 1;
-
+#endif
 /*
  * SCHED_OTHER wake-up granularity.
  *
