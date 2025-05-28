@@ -730,17 +730,17 @@ KBUILD_CFLAGS   +=  -mfpu=neon-fp-armv8 -mfloat-abi=hard
 # Inlin optimization
 ifdef CONFIG_INLINE_OPTIMIZATION
 INLINE_FLAGS := -finline-functions \
-		-mllvm -inline-threshold=700 \
-		-mllvm -inlinehint-threshold=500 \
+		-mllvm -inline-threshold=300 \
+		-mllvm -inlinehint-threshold=150 \
 		-mllvm -enable-pipeliner \
 		-mllvm -enable-loop-distribute \
 		-mllvm -enable-loopinterchange \
 		-mllvm -enable-loop-flatten \
 		-mllvm -enable-machine-outliner=never \
 		-mllvm -unroll-runtime \
-		-mllvm -unroll-count=6 \
-		-mllvm -unroll-threshold=1100 \
-		-mllvm -unroll-partial-threshold=1100
+		-mllvm -unroll-count=4 \
+		-mllvm -unroll-threshold=900 \
+		-mllvm -unroll-partial-threshold=900
 
 KBUILD_CFLAGS += $(INLINE_FLAGS)
 KBUILD_AFLAGS += $(INLINE_FLAGS)
