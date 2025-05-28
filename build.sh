@@ -4,7 +4,7 @@
 # Copyright (C) 2020-2021 Adithya R.
 
 SECONDS=0 # builtin bash timer
-ZIPNAME="ERROR-Q2-ginkgo-KSU-Next+SuSFS-$(date '+%Y%m%d-%H%M').zip"
+ZIPNAME="ERROR-Q2-ginkgo-SukiSU-Ultra+SuSFS-$(date '+%Y%m%d-%H%M').zip"
 TC_DIR="/home/tew/kernel/clang-r547379"
 GCC_64_DIR="/home/tew/kernel/aarch64-linux-android-4.9"
 GCC_32_DIR="/home/tew/kernel/arm-linux-androideabi-4.9"
@@ -39,13 +39,34 @@ MAKE_PARAMS="O=out \
    CROSS_COMPILE=$GCC_64_DIR/bin/aarch64-linux-android- \
    CROSS_COMPILE_ARM32=$GCC_32_DIR/bin/arm-linux-androideabi- \
    CLANG_TRIPLE=aarch64-linux-gnu- \
-   Image.gz-dtb dtbo.img"
+   Image dtbo.img"
 
 mkdir -p out
 make O=out ARCH=arm64 $DEFCONFIG
 
 echo -e "\nStarting compilation...\n"
 make -j$(nproc --all) $MAKE_PARAMS
+
+if [[ $1 = "-k" || $1 = "--kpm" ]]; then
+   rm -rf out/arch/arm64/boot/Image.gz-dtb
+   rm -rf out/arch/arm64/boot/Image.gz 
+   cd out/arch/arm64/boot/
+   curl -LO https://raw.githubusercontent.com/Numbersf/Action-Build/main/patch_linux
+   chmod +x patch_linux
+   ./patch_linux 2>&1 | tee patch_log.txt
+   rm -f Image
+   mv oImage Image
+   gzip -k Image Image.gz
+   cat Image.gz dts/qcom/*.dtb > Image.gz-dtb
+   cd -
+else
+   rm -rf out/arch/arm64/boot/Image.gz-dtb
+   rm -rf out/arch/arm64/boot/Image.gz Image.gz-dtb
+   cd out/arch/arm64/boot/
+   gzip -k Image Image.gz
+   cat Image.gz dts/qcom/*.dtb > Image.gz-dtb
+   cd -
+fi
 
 kernel="out/arch/arm64/boot/Image.gz-dtb"
 dtbo="out/arch/arm64/boot/dtbo.img"
