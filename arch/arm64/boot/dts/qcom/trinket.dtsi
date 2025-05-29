@@ -407,8 +407,7 @@
 	chosen {
 		bootargs = "quiet noirqdebug rcupdate.rcu_expedited=1 
 		rcupdate.rcu_normal_after_boot=1 rcu_nocbs=6-7 kpti=off
-		nohz_full=6-7 isolcpus=domain,6-7 irqaffinity=0-5 
-		idle=poll rcu_nocb_poll";
+		nohz_full=6-7 isolcpus=domain,6-7 irqaffinity=0-5";
 	};
 
 	soc: soc { };
