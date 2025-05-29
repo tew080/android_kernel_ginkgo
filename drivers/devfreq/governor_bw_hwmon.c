@@ -961,7 +961,27 @@ int register_bw_hwmon(struct device *dev, struct bw_hwmon *hwmon)
 		node->gov = &devfreq_gov_bw_hwmon;
 		node->attr_grp = &dev_attr_group;
 	}
-
+	
+#ifdef CONFIG_GINKGO
+	node->guard_band_mbps = 200;      // Increased safety margin for performance
+	node->decay_rate = 95;            // Slower decay - maintain high frequencies longer
+	node->io_percent = 20;            // Higher I/O consideration for better responsiveness
+	node->bw_step = 300;              // Larger steps for faster scaling
+	node->sample_ms = 25;             // Faster sampling for quicker response
+	node->up_scale = 2;               // 2x multiplier for aggressive up-scaling
+	node->up_thres = 5;               // Lower threshold - scale up more aggressively
+	node->down_thres = 15;            // Higher threshold - less aggressive down-scaling
+	node->down_count = 5;             // Require more samples before scaling down
+	node->hist_memory = 5;            // Enable history memory for better predictions
+	node->hyst_trigger_count = 2;     // Reduced hysteresis trigger
+	node->hyst_length = 100;          // Short hysteresis period
+	node->idle_mbps = 800;            // Higher idle bandwidth for responsiveness
+	node->use_ab = 1;                 // Keep active bandwidth voting
+	node->mbps_zones[1] = 1000;       // Low performance zone
+	node->mbps_zones[2] = 2500;       // Medium performance zone
+	node->mbps_zones[3] = 5000;       // High performance zone
+	node->mbps_zones[4] = 8000;       // Maximum performance zone
+#else
 	node->guard_band_mbps = 100;
 	node->decay_rate = 90;
 	node->io_percent = 16;
@@ -977,6 +997,7 @@ int register_bw_hwmon(struct device *dev, struct bw_hwmon *hwmon)
 	node->idle_mbps = 400;
 	node->use_ab = 1;
 	node->mbps_zones[0] = 0;
+#endif
 	node->hw = hwmon;
 
 	mutex_init(&node->mon_lock);

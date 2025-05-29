@@ -5952,9 +5952,15 @@ out_put_task:
 }
 
 char sched_lib_name[LIB_PATH_LENGTH] =
+#ifdef CONFIG_GINKGO
+{ "com.miHoYo., com.activision., com.epicgames, com.dts., UnityMain, libunity.so, libil2cpp.so, libmain.so, libcri_vip_unity.so, libopus.so, libxlua.so, libUE4.so, libAsphalt9.so, libnative-lib.so, libRiotGamesApi.so, libResources.so, libagame.so, libapp.so, libflutter.so, libMSDKCore.so, libFIFAMobileNeon.so, libUnreal.so, libEOSSDK.so, libcocos2dcpp.so"
+};
+unsigned int sched_lib_mask_force = 255;
+#else
 { "com.miHoYo.,com.activision.,UnityMain,libunity.so,libil2cpp.so,libfb.so"
 };
 unsigned int sched_lib_mask_force = 240;
+#endif
 bool is_sched_lib_based_app(pid_t pid)
 {
 	const char *name = NULL;

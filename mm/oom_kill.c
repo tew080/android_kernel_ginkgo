@@ -52,7 +52,11 @@
 
 int sysctl_panic_on_oom;
 int sysctl_oom_kill_allocating_task;
+#ifdef CONFIG_GINKGO
+int sysctl_oom_dump_tasks = 0;
+#else
 int sysctl_oom_dump_tasks = 1;
+#endif
 int sysctl_reap_mem_on_sigkill;
 
 DEFINE_MUTEX(oom_lock);
