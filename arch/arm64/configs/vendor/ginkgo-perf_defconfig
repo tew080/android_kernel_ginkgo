@@ -5946,3 +5946,10 @@ CONFIG_OPLUS_MM_HACKS=y
 ## end of oplus memory management hacks
 ######
 
+######
+## Use entropy optimization for zram
+######
+CONFIG_ZRAM_ENTROPY=y
+######
+## end of Use entropy optimization for zram
+######
