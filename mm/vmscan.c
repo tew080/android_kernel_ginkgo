@@ -2375,12 +2375,11 @@ static void get_scan_count(struct lruvec *lruvec, struct mem_cgroup *memcg,
 	unsigned long anon, file;
 	unsigned long ap, fp;
 	enum lru_list lru;
-
-	prepare_workingset_protection(pgdat, sc);
-
 #ifdef CONFIG_OPLUS_MM_HACKS
 	unsigned long totalswap = total_swap_pages;
 #endif /* CONFIG_OPLUS_MM_HACKS */
+
+	prepare_workingset_protection(pgdat, sc);
 
 #ifdef CONFIG_OPLUS_MM_HACKS
 	if (!current_is_kswapd())
