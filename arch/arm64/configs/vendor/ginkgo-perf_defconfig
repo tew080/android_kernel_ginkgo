@@ -5941,7 +5941,7 @@ CONFIG_CLEAN_MIN_KBYTES=196608
 ######
 ## oplus memory management hacks
 ######
-CONFIG_OPLUS_MM_HACKS=y
+# CONFIG_OPLUS_MM_HACKS is not set
 ######
 ## end of oplus memory management hacks
 ######
