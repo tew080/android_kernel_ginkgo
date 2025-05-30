@@ -1047,5 +1047,23 @@ void __init swap_setup(void)
 {
 #ifdef CONFIG_OPLUS_MM_HACKS
 	page_cluster = 0;
+#else
+unsigned long megs = totalram_pages >> (20 - PAGE_SHIFT);
+unsigned long swap_megs = total_swap_pages >> (20 - PAGE_SHIFT);
+
+if (unlikely(!total_swap_pages)) {
+    page_cluster = 2;  
+    return;
+}
+
+page_cluster = 2;  
+
+if (megs < 2048 || swap_megs < megs)
+    page_cluster = 1;
+else if (swap_megs >= (megs << 1))  
+    page_cluster = 3;
+
+if (unlikely(page_cluster > 4))
+    page_cluster = 2;
 #endif /* CONFIG_OPLUS_MM_HACKS */
 }
