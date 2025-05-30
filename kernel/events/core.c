@@ -451,7 +451,11 @@ int sysctl_perf_event_mlock __read_mostly = 512 + (PAGE_SIZE / 1024); /* 'free' 
 #define DEFAULT_MAX_SAMPLE_RATE 100000
 #endif
 
+#ifdef CONFIG_GINKGO
+#define DEFAULT_CPU_TIME_MAX_PERCENT	10
+#else
 #define DEFAULT_CPU_TIME_MAX_PERCENT	5
+#endif
 
 #define DEFAULT_SAMPLE_PERIOD_NS	(NSEC_PER_SEC / DEFAULT_MAX_SAMPLE_RATE)
 

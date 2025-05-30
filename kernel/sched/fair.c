@@ -171,7 +171,11 @@ unsigned int sysctl_sched_wakeup_granularity		= 1000000UL;
 unsigned int normalized_sysctl_sched_wakeup_granularity	= 1000000UL;
 #endif // CONFIG_SCHED_BORE
 
+#ifdef CONFIG_GINKGO
+unsigned int __read_mostly sysctl_sched_migration_cost	= 50000UL;
+#else
 unsigned int __read_mostly sysctl_sched_migration_cost	= 1000000UL;
+#endif
 DEFINE_PER_CPU_READ_MOSTLY(int, sched_load_boost);
 
 #ifdef CONFIG_SCHED_WALT
