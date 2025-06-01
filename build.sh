@@ -4,7 +4,7 @@
 # Copyright (C) 2020-2021 Adithya R.
 
 SECONDS=0 # builtin bash timer
-ZIPNAME="ERROR-Q2-ginkgo-SukiSU-Ultra+SuSFS-$(date '+%Y%m%d-%H%M').zip"
+ZIPNAME="ERROR-Q3-ginkgo-SukiSU-Ultra+SuSFS-$(date '+%Y%m%d-%H%M').zip"
 TC_DIR="/home/tew/kernel/clang-r547379"
 GCC_64_DIR="/home/tew/kernel/aarch64-linux-android-4.9"
 GCC_32_DIR="/home/tew/kernel/arm-linux-androideabi-4.9"
