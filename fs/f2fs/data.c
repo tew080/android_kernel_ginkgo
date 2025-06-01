@@ -487,9 +487,6 @@ int f2fs_submit_page_bio(struct f2fs_io_info *fio)
 	struct bio *bio;
 	struct page *page = fio->encrypted_page ?
 			fio->encrypted_page : fio->page;
-#ifdef CONFIG_FS_HPB
-	struct inode *inode = fio->page->mapping->host;
-#endif
 
 	if (!f2fs_is_valid_blkaddr(fio->sbi, fio->new_blkaddr,
 			__is_meta_io(fio) ? META_GENERIC : DATA_GENERIC))
@@ -520,13 +517,6 @@ int f2fs_submit_page_bio(struct f2fs_io_info *fio)
 			__read_io_type(page): WB_DATA_TYPE(fio->page));
 
 	__f2fs_submit_read_bio(fio->sbi, bio, fio->type);
-
-#ifdef CONFIG_FS_HPB
-	if(is_inode_flag_set(inode, FI_HPB_INODE)) {
-		bio->bi_opf |= REQ_HPB_PREFER;
-	}
-#endif
-
 	return 0;
 }
 
@@ -536,9 +526,6 @@ void f2fs_submit_page_write(struct f2fs_io_info *fio)
 	enum page_type btype = PAGE_TYPE_OF_BIO(fio->type);
 	struct f2fs_bio_info *io = sbi->write_io[btype] + fio->temp;
 	struct page *bio_page;
-#ifdef CONFIG_FS_HPB
-	struct inode *inode;
-#endif
 
 	f2fs_bug_on(sbi, is_read_io(fio->op));
 
@@ -562,10 +549,6 @@ next:
 
 	bio_page = fio->encrypted_page ? fio->encrypted_page : fio->page;
 	fio->op_flags |= fio->encrypted_page ? REQ_NOENCRYPT : 0;
-
-#ifdef CONFIG_FS_HPB
-	inode = fio->page->mapping->host;
-#endif
 
 	/* set submitted = true as a return value */
 	fio->submitted = true;
@@ -604,12 +587,6 @@ alloc_new:
 		__submit_merged_bio(io);
 		goto alloc_new;
 	}
-
-#ifdef CONFIG_FS_HPB
-	if(is_inode_flag_set(inode, FI_HPB_INODE)) {
-		io->bio->bi_opf |= REQ_HPB_PREFER;
-	}
-#endif
 
 	if (fio->io_wbc)
 		wbc_account_io(fio->io_wbc, bio_page, PAGE_SIZE);
@@ -667,11 +644,6 @@ static struct bio *f2fs_grab_read_bio(struct inode *inode, block_t blkaddr,
 		bio->bi_private = ctx;
 	}
 
-#ifdef CONFIG_FS_HPB
-	if(is_inode_flag_set(inode, FI_HPB_INODE)) {
-		bio->bi_opf |= REQ_HPB_PREFER;
-	}
-#endif
 	return bio;
 }
 
@@ -2731,9 +2703,6 @@ static ssize_t f2fs_direct_IO(struct kiocb *iocb, struct iov_iter *iter)
 	enum rw_hint hint = iocb->ki_hint;
 	int whint_mode = F2FS_OPTION(sbi).whint_mode;
 	bool do_opu;
-#ifdef CONFIG_FS_HPB
-	int dio_flags=0;
-#endif
 
 	err = check_direct_IO(inode, iter, offset);
 	if (err)
@@ -2767,23 +2736,11 @@ static ssize_t f2fs_direct_IO(struct kiocb *iocb, struct iov_iter *iter)
 			down_read(&fi->i_gc_rwsem[READ]);
 	}
 
-#if defined(CONFIG_FS_HPB)
-	dio_flags |= (rw == WRITE ? DIO_LOCKING | DIO_SKIP_HOLES : DIO_SKIP_HOLES);
-
-	if(is_inode_flag_set(inode, FI_HPB_INODE)) {
-		dio_flags |= DIO_HPB_IO;
-	}
-
-	err = __blockdev_direct_IO(iocb, inode, inode->i_sb->s_bdev,
-			iter, rw == WRITE ? get_data_block_dio_write :
-			get_data_block_dio, NULL, f2fs_dio_submit_bio,
-			dio_flags);
-#else
 	err = __blockdev_direct_IO(iocb, inode, inode->i_sb->s_bdev,
 			iter, rw == WRITE ? get_data_block_dio_write :
 			get_data_block_dio, NULL, f2fs_dio_submit_bio,
 			DIO_LOCKING | DIO_SKIP_HOLES);
-#endif
+
 	if (do_opu)
 		up_read(&fi->i_gc_rwsem[READ]);
 

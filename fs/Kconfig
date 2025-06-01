@@ -317,7 +317,4 @@ config FILE_TABLE_DEBUG
 	help
 	  This option enables debug of the open files using a global filetable
 
-config FS_HPB
-	bool "Support HPB on Filesystem"
-	default n
 endmenu

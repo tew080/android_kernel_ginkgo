@@ -28,10 +28,6 @@
 #define __FS_HAS_ENCRYPTION IS_ENABLED(CONFIG_F2FS_FS_ENCRYPTION)
 #include <linux/fscrypt.h>
 
-#ifdef CONFIG_FS_HPB
-#include <linux/fs_hpb.h>
-#endif
-
 #ifdef CONFIG_F2FS_CHECK_FS
 #define f2fs_bug_on(sbi, condition)	BUG_ON(condition)
 #else
@@ -652,9 +648,6 @@ enum {
 enum {
 	GC_FAILURE_PIN,
 	GC_FAILURE_ATOMIC,
-#ifdef CONFIG_FS_HPB
-	FI_HPB_INODE,           /* HPB */
-#endif
 	MAX_GC_FAILURE
 };
 
