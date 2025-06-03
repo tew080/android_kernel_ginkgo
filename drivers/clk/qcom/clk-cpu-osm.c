@@ -657,20 +657,20 @@ static int osm_cpufreq_cpu_init(struct cpufreq_policy *policy)
 	struct cpufreq_frequency_table *table;
 	struct clk_osm *c, *parent;
 	struct clk_hw *p_hw;
-	int ret, of_len;
+	int ret = 0, of_len = 0;
 	unsigned int i;
 	u32 *of_table = NULL;
-	char tbl_name[] = "qcom,cpufreq-table-##";
+	char tbl_name[32];
 
 	c = osm_configure_policy(policy);
 	if (!c) {
-		pr_err("no clock for CPU%d\n", policy->cpu);
+		pr_err("[OSM] No clock for CPU%d\n", policy->cpu);
 		return -ENODEV;
 	}
 
 	p_hw = clk_hw_get_parent(&c->hw);
 	if (!p_hw) {
-		pr_err("no parent clock for CPU%d\n", policy->cpu);
+		pr_err("[OSM] No parent clock for CPU%d\n", policy->cpu);
 		return -ENODEV;
 	}
 
@@ -678,82 +678,54 @@ static int osm_cpufreq_cpu_init(struct cpufreq_policy *policy)
 	c->vbase = parent->vbase;
 
 	snprintf(tbl_name, sizeof(tbl_name), "qcom,cpufreq-table-%d", policy->cpu);
+
 	if (of_find_property(parent->dev->of_node, tbl_name, &of_len) && of_len > 0) {
 		of_len /= sizeof(*of_table);
-
 		of_table = kcalloc(of_len, sizeof(*of_table), GFP_KERNEL);
 		if (!of_table) {
-			pr_err("failed to allocate DT frequency table memory for CPU%d\n",
-			       policy->cpu);
+			pr_err("[OSM] Failed to alloc freq table for CPU%d\n", policy->cpu);
 			return -ENOMEM;
 		}
 
-		ret = of_property_read_u32_array(parent->dev->of_node, tbl_name,
-						 of_table, of_len);
+		ret = of_property_read_u32_array(parent->dev->of_node, tbl_name, of_table, of_len);
 		if (ret) {
-			pr_err("failed to read DT frequency table for CPU%d, err=%d\n",
-			       policy->cpu, ret);
+			pr_err("[OSM] Failed to read freq table for CPU%d, err=%d\n", policy->cpu, ret);
+			kfree(of_table);
 			return ret;
 		}
+	} else {
+		pr_err("[OSM] DT property %s not found or empty\n", tbl_name);
+		return -EINVAL;
 	}
 
-	table = kcalloc(parent->osm_table_size + 1, sizeof(*table), GFP_KERNEL);
-	if (!table)
+	table = kcalloc(of_len + 1, sizeof(*table), GFP_KERNEL);
+	if (!table) {
+		kfree(of_table);
 		return -ENOMEM;
+	}
 
-	for (i = 0; i < parent->osm_table_size; i++) {
-		u32 data, src, div, lval, core_count;
-
-		data = clk_osm_read_reg(c, FREQ_REG + i * OSM_REG_SIZE);
-		src = (data & GENMASK(31, 30)) >> 30;
-		div = (data & GENMASK(29, 28)) >> 28;
-		lval = data & GENMASK(7, 0);
-		core_count = CORE_COUNT_VAL(data);
-
-		/* Save the frequencies in terms of KHz */
-		if (!src)
-			table[i].frequency = OSM_INIT_RATE / 1000;
-		else
-			table[i].frequency = (XO_RATE * lval) / 1000;
-		table[i].driver_data = table[i].frequency;
-
-		/* Ignore frequency if not present in DT table */
-		if (!osm_dt_find_freq(of_table, of_len, table[i].frequency))
-			table[i].frequency = CPUFREQ_ENTRY_INVALID;
-
-		if (core_count == SINGLE_CORE_COUNT)
-			table[i].frequency = CPUFREQ_ENTRY_INVALID;
-
-		/* Two of the same frequencies means end of table */
-		if (i > 0 && table[i - 1].driver_data == table[i].driver_data) {
-			struct cpufreq_frequency_table *prev = &table[i - 1];
-
-			if (prev->frequency == CPUFREQ_ENTRY_INVALID) {
-				prev->flags = CPUFREQ_BOOST_FREQ;
-				prev->frequency = prev->driver_data;
-			}
-
-			break;
-		}
+	for (i = 0; i < of_len; i++) {
+		table[i].frequency = of_table[i];
+		table[i].driver_data = of_table[i];
+		pr_debug("[OSM] CPU%d freq[%d] = %u KHz\n", policy->cpu, i, of_table[i]);
 	}
 	table[i].frequency = CPUFREQ_TABLE_END;
 
 	ret = cpufreq_table_validate_and_show(policy, table);
 	if (ret) {
-		pr_err("%s: invalid frequency table: %d\n", __func__, ret);
-		goto err;
+		pr_err("[OSM] Invalid cpufreq table for CPU%d\n", policy->cpu);
+		goto err_free;
 	}
 
 	policy->dvfs_possible_from_any_cpu = true;
 	policy->fast_switch_possible = true;
 	policy->driver_data = c;
-
 	cpumask_copy(policy->cpus, &c->related_cpus);
 
 	kfree(of_table);
 	return 0;
 
-err:
+err_free:
 	kfree(of_table);
 	kfree(table);
 	return ret;
