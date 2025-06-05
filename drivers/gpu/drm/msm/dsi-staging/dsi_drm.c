@@ -387,19 +387,6 @@ static void dsi_bridge_post_disable(struct drm_bridge *bridge)
 
 extern int nvt_ts_recovery_callback(void);
 
-#if (defined CONFIG_TOUCHSCREEN_XIAOMI_C3J)
-typedef int(*touchpanel_recovery_cb_p_t)(void);
-static touchpanel_recovery_cb_p_t touchpanel_recovery_cb_p = NULL;
-int set_touchpanel_recovery_callback(touchpanel_recovery_cb_p_t cb)
-{
-	if (IS_ERR_OR_NULL(cb))
-		return -1;
-	touchpanel_recovery_cb_p = cb;
-	return 0;
-}
-EXPORT_SYMBOL(set_touchpanel_recovery_callback);
-#endif
-
 static void prim_panel_off_delayed_work(struct work_struct *work)
 {
 	mutex_lock(&gbridge->base.lock);

@@ -347,6 +347,14 @@ int dsi_panel_trigger_esd_attack(struct dsi_panel *panel)
 	return -EINVAL;
 }
 
+typedef int (*lct_tp_reset_enable_cb_t)(bool en);
+static lct_tp_reset_enable_cb_t lct_tp_reset_enable_cb_p = NULL;
+void set_tp_reset_gpio_callback(lct_tp_reset_enable_cb_t p_callback)
+{
+	lct_tp_reset_enable_cb_p = p_callback;
+}
+EXPORT_SYMBOL(set_tp_reset_gpio_callback);
+
 static int dsi_panel_reset(struct dsi_panel *panel)
 {
 	int rc = 0;
@@ -361,6 +369,8 @@ static int dsi_panel_reset(struct dsi_panel *panel)
 		}
 	}
 
+
+	usleep_range(12*1000,12*1000);
 	if (r_config->count) {
 		rc = gpio_direction_output(r_config->reset_gpio,
 			r_config->sequence[0].level);
@@ -370,14 +380,42 @@ static int dsi_panel_reset(struct dsi_panel *panel)
 		}
 	}
 
-	for (i = 0; i < r_config->count; i++) {
-		gpio_set_value(r_config->reset_gpio,
-			       r_config->sequence[i].level);
+	if (strstr(g_lcd_id, "huaxing") != NULL) {
+
+		if (!IS_ERR_OR_NULL(lct_tp_reset_enable_cb_p)) {
+			lct_tp_reset_enable_cb_p(true);
+			usleep_range(5 * 1000, 5 * 1000);
+		}
+		gpio_set_value(r_config->reset_gpio, 1);
+		usleep_range(5 * 1000, 5 * 1000);
+
+		if (!IS_ERR_OR_NULL(lct_tp_reset_enable_cb_p)) {
+			lct_tp_reset_enable_cb_p(false);
+			usleep_range(5 * 1000, 5 * 1000);
+		}
+		gpio_set_value(r_config->reset_gpio, 0);
+		usleep_range(5 * 1000, 5 * 1000);
+
+		if (!IS_ERR_OR_NULL(lct_tp_reset_enable_cb_p)) {
+			lct_tp_reset_enable_cb_p(true);
+			usleep_range(5 * 1000, 5 * 1000);
+		}
+		gpio_set_value(r_config->reset_gpio, 1);
+		usleep_range(20 * 1000, 20 * 1000);
 
 
-		if (r_config->sequence[i].sleep_ms)
-			usleep_range(r_config->sequence[i].sleep_ms * 1000,
-				(r_config->sequence[i].sleep_ms * 1000) + 100);
+	} else {
+
+		for (i = 0; i < r_config->count; i++) {
+			gpio_set_value(r_config->reset_gpio,
+					r_config->sequence[i].level);
+
+			pr_err("[NVT-ts] lcd-reset_gpio = %d\n", r_config->sequence[i].level);
+
+			if (r_config->sequence[i].sleep_ms)
+				usleep_range(r_config->sequence[i].sleep_ms * 1000,
+						(r_config->sequence[i].sleep_ms * 1000) + 100);
+		}
 	}
 
 	if (gpio_is_valid(panel->bl_config.en_gpio)) {
