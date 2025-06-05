@@ -65,6 +65,9 @@
 			reg = <0x0 0x0>;
 			enable-method = "psci";
 			capacity-dmips-mhz = <1024>;
+			freq-energy-model;
+			supply-name = "pm6125_s1";
+			operating-points-v2 = <&cpu0_opp_table>;
 			sched-energy-costs = <&CPU_COST_0 &CLUSTER_COST_0>;
 			d-cache-size = <0x8000>;
 			i-cache-size = <0x8000>;
@@ -97,6 +100,9 @@
 			reg = <0x0 0x1>;
 			enable-method = "psci";
 			capacity-dmips-mhz = <1024>;
+			freq-energy-model;
+			supply-name = "pm6125_s1";
+			operating-points-v2 = <&cpu0_opp_table>;
 			sched-energy-costs = <&CPU_COST_0 &CLUSTER_COST_0>;
 			d-cache-size = <0x8000>;
 			i-cache-size = <0x8000>;
@@ -125,6 +131,9 @@
 			reg = <0x0 0x2>;
 			enable-method = "psci";
 			capacity-dmips-mhz = <1024>;
+			freq-energy-model;
+			supply-name = "pm6125_s1";
+			operating-points-v2 = <&cpu0_opp_table>;
 			sched-energy-costs = <&CPU_COST_0 &CLUSTER_COST_0>;
 			d-cache-size = <0x8000>;
 			i-cache-size = <0x8000>;
@@ -153,6 +162,9 @@
 			reg = <0x0 0x3>;
 			enable-method = "psci";
 			capacity-dmips-mhz = <1024>;
+			freq-energy-model;
+			supply-name = "pm6125_s1";
+			operating-points-v2 = <&cpu0_opp_table>;
 			sched-energy-costs = <&CPU_COST_0 &CLUSTER_COST_0>;
 			d-cache-size = <0x8000>;
 			i-cache-size = <0x8000>;
@@ -180,7 +192,10 @@
 			compatible = "arm,kryo";
 			reg = <0x0 0x100>;
 			enable-method = "psci";
-			capacity-dmips-mhz = <1740>;
+			capacity-dmips-mhz = <1638>;
+			freq-energy-model;
+			supply-name = "pm6125_s1";
+			operating-points-v2 = <&cpu4_opp_table>;
 			sched-energy-costs = <&CPU_COST_1 &CLUSTER_COST_1>;
 			d-cache-size = <0x10000>;
 			i-cache-size = <0x10000>;
@@ -213,7 +228,10 @@
 			compatible = "arm,kryo";
 			reg = <0x0 0x101>;
 			enable-method = "psci";
-			capacity-dmips-mhz = <1740>;
+			capacity-dmips-mhz = <1638>;
+			freq-energy-model;
+			supply-name = "pm6125_s1";
+			operating-points-v2 = <&cpu4_opp_table>;
 			sched-energy-costs = <&CPU_COST_1 &CLUSTER_COST_1>;
 			d-cache-size = <0x10000>;
 			i-cache-size = <0x10000>;
@@ -241,7 +259,10 @@
 			compatible = "arm,kryo";
 			reg = <0x0 0x102>;
 			enable-method = "psci";
-			capacity-dmips-mhz = <1740>;
+			capacity-dmips-mhz = <1638>;
+			freq-energy-model;
+			supply-name = "pm6125_s1";
+			operating-points-v2 = <&cpu4_opp_table>;
 			sched-energy-costs = <&CPU_COST_1 &CLUSTER_COST_1>;
 			d-cache-size = <0x10000>;
 			i-cache-size = <0x10000>;
@@ -269,7 +290,10 @@
 			compatible = "arm,kryo";
 			reg = <0x0 0x103>;
 			enable-method = "psci";
-			capacity-dmips-mhz = <1740>;
+			capacity-dmips-mhz = <1638>;
+			freq-energy-model;
+			supply-name = "pm6125_s1";
+			operating-points-v2 = <&cpu4_opp_table>;
 			sched-energy-costs = <&CPU_COST_1 &CLUSTER_COST_1>;
 			d-cache-size = <0x10000>;
 			i-cache-size = <0x10000>;
@@ -329,6 +353,35 @@
 				};
 			};
 		};
+
+		cpu0_opp_table: opp-table-cpu0 {
+			compatible = "operating-points-v2";
+			opp-shared;
+			opp-300000000 { opp-hz = <0 300000000>; opp-microvolt = <540000>; };	
+			opp-614400000 { opp-hz = <0 614400000>; opp-microvolt = <540000>; };	
+			opp-864000000 { opp-hz = <0 864000000>; opp-microvolt = <550000>; };	
+			opp-1017600000 { opp-hz = <0 1017600000>; opp-microvolt = <565000>; };	
+			opp-1305600000 { opp-hz = <0 1305600000>; opp-microvolt = <602000>; };	
+			opp-1420800000 { opp-hz = <0 1420800000>; opp-microvolt = <629000>; };	
+			opp-1612800000 { opp-hz = <0 1612800000>; opp-microvolt = <704000>; };	
+			opp-1804800000 { opp-hz = <0 1804800000>; opp-microvolt = <775000>; };	
+			opp-1900800000 { opp-hz = <0 1900800000>; opp-microvolt = <816000>; };	
+		};
+
+		cpu4_opp_table: opp-table-cpu4 {
+			compatible = "operating-points-v2";
+			opp-shared;
+			opp-300000000 { opp-hz = <0 300000000>; opp-microvolt = <540000>; };	
+			opp-652800000 { opp-hz = <0 652800000>; opp-microvolt = <540000>; };	
+			opp-902400000 { opp-hz = <0 902400000>; opp-microvolt = <561000>; };	
+			opp-1056000000 { opp-hz = <0 1056000000>; opp-microvolt = <583000>; };	
+			opp-1401600000 { opp-hz = <0 1401600000>; opp-microvolt = <622000>; };	
+			opp-1536000000 { opp-hz = <0 1536000000>; opp-microvolt = <649000>; };	
+			opp-1804800000 { opp-hz = <0 1804800000>; opp-microvolt = <721000>; };	
+			opp-2150400000 { opp-hz = <0 2150400000>; opp-microvolt = <775000>; };	
+			opp-2419200000 { opp-hz = <0 2419200000>; opp-microvolt = <857000>; };	
+			opp-3187200000 { opp-hz = <0 3187200000>; opp-microvolt = <898000>; };	
+		};
 	};
 
 	energy_costs: energy-costs {
@@ -347,30 +400,25 @@
 				1900800 195
 			>;
 			idle-cost-data = <
-				10 8 6 4
+				8 6 4 3
 			>;
 		};
 
 		CPU_COST_1: core-cost1 {
 			busy-cost-data = <
-				300000	211
-				652800	417
-				902400	722
-				1056000	991
-				1401600	1577
-				1536000	1932
-				1804800	2579
-				2016000	3391
-                2112000 3800 
-                2208000 4300 
-
-				//2323200 5250
-				//2419200 6000
-				//2534400 6800
-				//2649600 7700
+				300000	150
+				652800	280
+				902400	480
+				1056000	700
+				1401600	1100
+				1536000	1300
+				1804800	1600
+				2150400	1900
+				2419200	2100
+				3187200	2300
 			>;
 			idle-cost-data = <
-				100 60 40 20
+				80 50 30 10
 			>;
 		};
 
@@ -400,14 +448,9 @@
 				1401600	88
 				1536000	100
 				1804800	108
-				2016000	120
-                2112000 135
-                2208000 150
-
-				//2323200 245
-				//2419200 280
-				//2534400 320
-				//2649600 370 
+				2150400	120
+                2419200 135
+                3187200 150
 			>;
 			idle-cost-data = <
 				4 3 2 1
@@ -951,14 +994,9 @@
 			<1401600>,
 			<1536000>,
 			<1804800>,
-			<2016000>,
-			<2112000>,
-			<2208000>;
-
-			//<2323200>,
-			//<2419200>,
-			//<2534400>,
-			//<2649600>;
+			<2150400>,
+			<2419200>,
+			<3187200>;
 	};
 
 	clock_debugcc: qcom,cc-debug {
@@ -2654,14 +2692,9 @@
 				< 1401600 MHZ_TO_MBPS(768, 8) >,
 				< 1536000 MHZ_TO_MBPS(1017, 8) >,
 				< 1804800 MHZ_TO_MBPS(1353, 8) >,
-				< 2016000 MHZ_TO_MBPS(1555, 8) >,
-				< 2112000 MHZ_TO_MBPS(1804, 8) >,
-				< 2208000 MHZ_TO_MBPS(2133, 8) >;
-				
-				//< 2323200 MHZ_TO_MBPS(2133, 8) >,
-				//< 2419200 MHZ_TO_MBPS(2133, 8) >,
-				//< 2534400 MHZ_TO_MBPS(2133, 8) >,
-				//< 2649600 MHZ_TO_MBPS(2133, 8) >;
+				< 2150400 MHZ_TO_MBPS(1555, 8) >,
+				< 2419200 MHZ_TO_MBPS(1804, 8) >,
+				< 3187200 MHZ_TO_MBPS(2133, 8) >;
 		};
 	};
 
@@ -2691,14 +2724,9 @@
 				< 1401600 MHZ_TO_MBPS(768, 8) >,
 				< 1536000 MHZ_TO_MBPS(1017, 8) >,
 				< 1804800 MHZ_TO_MBPS(1353, 8) >,
-				< 2016000 MHZ_TO_MBPS(1555, 8) >,
-				< 2112000 MHZ_TO_MBPS(1804, 8) >,
-				< 2208000 MHZ_TO_MBPS(2133, 8) >;
-
-				//< 2323200 MHZ_TO_MBPS(2133, 8) >,
-				//< 2419200 MHZ_TO_MBPS(2133, 8) >,
-				//< 2534400 MHZ_TO_MBPS(2133, 8) >,
-				//< 2649600 MHZ_TO_MBPS(2133, 8) >;
+				< 2150400 MHZ_TO_MBPS(1555, 8) >,
+				< 2419200 MHZ_TO_MBPS(1804, 8) >,
+				< 3187200 MHZ_TO_MBPS(2133, 8) >;
 		};
 	};
 

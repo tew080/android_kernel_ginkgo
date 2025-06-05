@@ -119,6 +119,10 @@ config INLINE_OPTIMIZATION
 	  optimize for size (CC_OPTIMIZE_FOR_SIZE) or optimize for
 	  performance (CC_OPTIMIZE_FOR_PERFORMANCE) configs.
 
+config SNAPDRAGON_OPTIMIZATION
+	bool "Optimize compiler Snapdragon Flag"
+	default n
+
 config GINKGO
 	bool "custom"
 	default n

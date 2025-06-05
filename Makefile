@@ -689,6 +689,7 @@ include arch/$(SRCARCH)/Makefile
 
 ifdef CONFIG_LLVM_POLLY
 POLLY_FLAGS := -mllvm -polly \
+		-mllvm -polly-run-dce \
 		-mllvm -polly-invariant-load-hoisting \
 		-mllvm -polly-optimized-scops \
 		-mllvm -polly-vectorizer=stripmine \
@@ -722,15 +723,17 @@ else ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS   += -Os
 endif # CONFIG_CC_OPTIMIZE_FOR_SIZE
 
+ifdef CONFIG_SNAPDRAGON_OPTIMIZATION
 # Snapdragon optimization
 KBUILD_CFLAGS	+=  -mcpu=cortex-a73 -mtune=cortex-a73
 KBUILD_CFLAGS   +=  -march=armv8-a+fp+simd+crc+crypto 
 KBUILD_CFLAGS   +=  -mfpu=neon-fp-armv8 -mfloat-abi=hard
+endif # CONFIG_SNAPDRAGON_OPTIMIZATION
 
 # Inlin optimization
 ifdef CONFIG_INLINE_OPTIMIZATION
 INLINE_FLAGS := -finline-functions \
-		-mllvm -inline-threshold=300 \
+		-mllvm -inline-threshold=200 \
 		-mllvm -inlinehint-threshold=150 \
 		-mllvm -enable-pipeliner \
 		-mllvm -enable-loop-distribute \
@@ -739,8 +742,8 @@ INLINE_FLAGS := -finline-functions \
 		-mllvm -enable-machine-outliner=never \
 		-mllvm -unroll-runtime \
 		-mllvm -unroll-count=4 \
-		-mllvm -unroll-threshold=900 \
-		-mllvm -unroll-partial-threshold=900
+		-mllvm -unroll-threshold=300 \
+		-mllvm -unroll-partial-threshold=200
 
 KBUILD_CFLAGS += $(INLINE_FLAGS)
 KBUILD_AFLAGS += $(INLINE_FLAGS)

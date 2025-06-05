@@ -34,6 +34,14 @@
 #include <linux/slab.h>
 #include <dt-bindings/clock/qcom,cpucc-sm8150.h>
 
+#include <linux/of.h>
+#include <linux/device.h>
+#include <linux/delay.h>
+#include <linux/delay.h>
+#include <linux/of_device.h>
+#include <linux/regulator/consumer.h>
+#include <linux/module.h>
+
 #include "common.h"
 #include "clk-regmap.h"
 #include "clk-voter.h"
@@ -535,6 +543,14 @@ static struct clk_osm *logical_cpu_to_clk(int cpu)
 		}
 
 		cpu_clk_map[cpu] = clk_cpu_map[hwid];
+
+		if (cpu_clk_map[cpu]) {
+			if (cpu < 4)
+				cpu_clk_map[cpu]->cluster_num = 0;
+			else
+				cpu_clk_map[cpu]->cluster_num = 4;
+		}
+
 	}
 
 	return cpu_clk_map[cpu];
@@ -677,25 +693,29 @@ static int osm_cpufreq_cpu_init(struct cpufreq_policy *policy)
 	parent = to_clk_osm(p_hw);
 	c->vbase = parent->vbase;
 
-	snprintf(tbl_name, sizeof(tbl_name), "qcom,cpufreq-table-%d", policy->cpu);
+	ret = clk_prepare_enable(c->hw.clk);
+	if (ret) {
+		pr_err("[OSM] Failed to enable CPU%d clock\n", policy->cpu);
+		return ret;
+	}
 
-	if (of_find_property(parent->dev->of_node, tbl_name, &of_len) && of_len > 0) {
-		of_len /= sizeof(*of_table);
-		of_table = kcalloc(of_len, sizeof(*of_table), GFP_KERNEL);
-		if (!of_table) {
-			pr_err("[OSM] Failed to alloc freq table for CPU%d\n", policy->cpu);
-			return -ENOMEM;
-		}
+	snprintf(tbl_name, sizeof(tbl_name), "qcom,cpufreq-table-%d", c->cluster_num);
 
-		ret = of_property_read_u32_array(parent->dev->of_node, tbl_name, of_table, of_len);
-		if (ret) {
-			pr_err("[OSM] Failed to read freq table for CPU%d, err=%d\n", policy->cpu, ret);
-			kfree(of_table);
-			return ret;
-		}
-	} else {
-		pr_err("[OSM] DT property %s not found or empty\n", tbl_name);
+	if (!of_find_property(parent->dev->of_node, tbl_name, &of_len) || of_len <= 0) {
+		pr_err("[OSM] DT property %s not found or empty, aborting\n", tbl_name);
 		return -EINVAL;
+	}
+
+	of_len /= sizeof(*of_table);
+	of_table = kcalloc(of_len, sizeof(*of_table), GFP_KERNEL);
+	if (!of_table)
+		return -ENOMEM;
+
+	ret = of_property_read_u32_array(parent->dev->of_node, tbl_name, of_table, of_len);
+	if (ret) {
+		pr_err("[OSM] Failed to read freq table for CPU%d, err=%d\n", policy->cpu, ret);
+		kfree(of_table);
+		return ret;
 	}
 
 	table = kcalloc(of_len + 1, sizeof(*table), GFP_KERNEL);
@@ -707,7 +727,7 @@ static int osm_cpufreq_cpu_init(struct cpufreq_policy *policy)
 	for (i = 0; i < of_len; i++) {
 		table[i].frequency = of_table[i];
 		table[i].driver_data = of_table[i];
-		pr_debug("[OSM] CPU%d freq[%d] = %u KHz\n", policy->cpu, i, of_table[i]);
+		pr_info("[OSM] CPU%d: freq[%d] = %u KHz\n", policy->cpu, i, of_table[i]);
 	}
 	table[i].frequency = CPUFREQ_TABLE_END;
 
@@ -716,6 +736,11 @@ static int osm_cpufreq_cpu_init(struct cpufreq_policy *policy)
 		pr_err("[OSM] Invalid cpufreq table for CPU%d\n", policy->cpu);
 		goto err_free;
 	}
+
+	policy->min = table[0].frequency;
+	policy->max = table[of_len - 1].frequency;
+	policy->cpuinfo.min_freq = table[0].frequency;
+	policy->cpuinfo.max_freq = table[of_len - 1].frequency;
 
 	policy->dvfs_possible_from_any_cpu = true;
 	policy->fast_switch_possible = true;
@@ -726,6 +751,7 @@ static int osm_cpufreq_cpu_init(struct cpufreq_policy *policy)
 	return 0;
 
 err_free:
+	clk_disable_unprepare(c->hw.clk);
 	kfree(of_table);
 	kfree(table);
 	return ret;
@@ -773,57 +799,126 @@ static u32 find_voltage(struct clk_osm *c, unsigned long rate)
 	return -EINVAL;
 }
 
-static int add_opp(struct clk_osm *c, struct device **device_list, int count)
+static int add_opp(struct clk_osm *c, struct device **dev_list, int count)
 {
-	unsigned long rate = 0;
-	u32 uv;
-	long rc;
-	int i, j = 0;
-	unsigned long min_rate = c->hw.init->rate_max[0];
-	unsigned long max_rate =
-			c->hw.init->rate_max[c->hw.init->num_rate_max - 1];
+    int i, j, ret;
+    unsigned long rate;
+    u32 uv;
+    struct dev_pm_opp *opp;
+    struct device *dev;
+    struct device_node *np, *opp_np, *cpucc_np;
+    bool is_silver, is_gold;
+    struct regulator *reg;
 
-	while (1) {
-		rate = c->hw.init->rate_max[j++];
-		uv = find_voltage(c, rate);
-		if (uv <= 0) {
-			pr_warn("No voltage for %lu.\n", rate);
-			return -EINVAL;
-		}
+    cpucc_np = of_find_compatible_node(NULL, NULL, "qcom,clk-cpu-osm-trinket");
+    if (!cpucc_np) {
+        pr_err("[OSM] clock_cpucc node not found\n");
+        return -ENODEV;
+    }
+    pr_info("[OSM] Found clock_cpucc node: %s\n", cpucc_np->full_name);
 
-		for (i = 0; i < count; i++) {
-			rc = dev_pm_opp_add(device_list[i], rate, uv);
-			if (rc) {
-				pr_warn("failed to add OPP for %lu\n", rate);
-				return rc;
-			}
-		}
+    for (j = 0; j < count; j++) {
+        dev = dev_list[j];
+        np = dev->of_node;
 
-		/*
-		 * Print the OPP pair for the lowest and highest frequency for
-		 * each device that we're populating. This is important since
-		 * this information will be used by thermal mitigation and the
-		 * scheduler.
-		 */
-		if (rate == min_rate) {
-			for (i = 0; i < count; i++) {
-				pr_info("Set OPP pair (%lu Hz, %d uv) on %s\n",
-					rate, uv, dev_name(device_list[i]));
-			}
-		}
+        is_silver = strstr(dev_name(dev), "cpu0") || strstr(dev_name(dev), "cpu1") ||
+                    strstr(dev_name(dev), "cpu2") || strstr(dev_name(dev), "cpu3");
+        is_gold = strstr(dev_name(dev), "cpu4") || strstr(dev_name(dev), "cpu5") ||
+                  strstr(dev_name(dev), "cpu6") || strstr(dev_name(dev), "cpu7");
 
-		if (rate == max_rate && max_rate != min_rate) {
-			for (i = 0; i < count; i++) {
-				pr_info("Set OPP pair (%lu Hz, %d uv) on %s\n",
-					rate, uv, dev_name(device_list[i]));
-			}
-			break;
-		}
+        pr_info("[OSM] CPU%d: device name=%s, is_silver=%d, is_gold=%d, node=%s\n",
+                j, dev_name(dev), is_silver, is_gold, np ? np->full_name : "null");
 
-		if (min_rate == max_rate)
-			break;
-	}
-	return 0;
+        /* Try getting regulator with proper error handling */
+        reg = devm_regulator_get(dev, "pm6125_s1");
+        if (IS_ERR(reg)) {
+            if (PTR_ERR(reg) == -EPROBE_DEFER) {
+                pr_info("[OSM] CPU%d: pm6125_s1 probe deferred\n", j);
+                of_node_put(cpucc_np);
+                return -EPROBE_DEFER;
+            }
+            	pr_info("[OSM] CPU%d: No regulator found, will use OPP without regulator\n", j);
+            reg = NULL;
+            } else {
+                pr_info("[OSM] CPU%d: Got pm6125_s1 regulator\n", j);
+        	}
+
+        opp_np = of_parse_phandle(np, "operating-points-v2", 0);
+        if (!opp_np) {
+            pr_err("[OSM] CPU%d: No operating-points-v2, skipping\n", j);
+            continue;
+        }
+        pr_info("[OSM] CPU%d: Found OPP table: %s\n", j, opp_np->full_name);
+
+        /* Add OPPs from device tree */
+        for_each_available_child_of_node(opp_np, np) {
+            u64 freq;
+            u32 microvolt;
+
+            if (of_property_read_u64(np, "opp-hz", &freq)) {
+                pr_err("[OSM] CPU%d: Failed to read opp-hz for OPP %s\n", j, np->name);
+                continue;
+            }
+            rate = (unsigned long)freq;
+
+            if (of_property_read_u32(np, "opp-microvolt", &microvolt)) {
+                pr_err("[OSM] CPU%d: Failed to read opp-microvolt for %lu Hz, using 912000 uV\n", j, rate);
+                uv = 912000;
+            } else {
+                uv = microvolt;
+            }
+
+            /* Add OPP with or without regulator */
+            if (reg) {
+                ret = dev_pm_opp_add(dev, rate, uv);
+            } else {
+                ret = dev_pm_opp_add(dev, rate, 0);
+            }
+            if (ret) {
+                pr_err("[OSM] CPU%d: Failed to add OPP %lu Hz, %u uV: %d\n", j, rate, uv, ret);
+                continue;
+            }
+            pr_info("[OSM] CPU%d: Added OPP: %lu Hz, %u uV\n", j, rate, uv);
+        }
+        of_node_put(opp_np);
+
+        /* Verify OPP table */
+        pr_info("[OSM] CPU%d: Verifying OPP table\n", j);
+        if (is_gold) {
+            const unsigned long gold_freqs[] = {
+                300000000, 652800000, 902400000, 1056000000, 1401600000,
+                1536000000, 1804800000, 2150400000, 2419200000, 3187200000
+            };
+            for (i = 0; i < ARRAY_SIZE(gold_freqs); i++) {
+                rate = gold_freqs[i];
+                opp = dev_pm_opp_find_freq_exact(dev, rate, true);
+                if (!IS_ERR(opp)) {
+                    pr_info("[OSM] CPU%d: Found OPP %lu Hz\n", j, rate);
+                    dev_pm_opp_put(opp);
+                } else {
+                    pr_err("[OSM] CPU%d: OPP %lu Hz not found: %ld\n", j, rate, PTR_ERR(opp));
+                }
+            }
+        } else if (is_silver) {
+            const unsigned long silver_freqs[] = {
+                300000000, 614400000, 864000000, 1017600000, 1305600000,
+                1420800000, 1612800000, 1804800000, 1900800000
+            };
+            for (i = 0; i < ARRAY_SIZE(silver_freqs); i++) {
+                rate = silver_freqs[i];
+                opp = dev_pm_opp_find_freq_exact(dev, rate, true);
+                if (!IS_ERR(opp)) {
+                    pr_info("[OSM] CPU%d: Found OPP %lu Hz\n", j, rate);
+                    dev_pm_opp_put(opp);
+                } else {
+                    pr_err("[OSM] CPU%d: OPP %lu Hz not found: %ld\n", j, rate, PTR_ERR(opp));
+                }
+            }
+        }
+    }
+
+    of_node_put(cpucc_np);
+    return 0;
 }
 
 static int derive_device_list(struct device **device_list,

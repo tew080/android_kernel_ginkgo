@@ -272,7 +272,7 @@ void kgsl_process_init_debugfs(struct kgsl_process_private *private)
 
 	dentry = debugfs_create_file("sparse_mem", 0444, private->debug_root,
 		(void *) ((unsigned long) pid_nr(private->pid)),
-		&process_sparse_mem_fops);
+		&process_mem_fops);
 
 	if (IS_ERR_OR_NULL(dentry))
 		WARN((dentry == NULL),

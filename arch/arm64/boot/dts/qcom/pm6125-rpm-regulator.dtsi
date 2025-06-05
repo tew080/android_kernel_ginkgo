@@ -18,13 +18,16 @@
 		qcom,resource-id = <0>;
 		qcom,regulator-type = <1>;
 		qcom,hpm-min-load = <100000>;
-		status = "disabled";
+		status = "okay";
 
 		regulator-s1 {
 			compatible = "qcom,rpm-smd-regulator";
 			regulator-name = "pm6125_s1";
+            regulator-min-microvolt = <588000>;
+            regulator-max-microvolt = <1056000>;
+			qcom,init-voltage = <588000>;
 			qcom,set = <3>;
-			status = "disabled";
+			status = "okay";
 		};
 	};
 
