@@ -722,10 +722,12 @@ else ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS   += -Os
 endif # CONFIG_CC_OPTIMIZE_FOR_SIZE
 
+ifdef CONFIG_SNAPDRAGON_OPTIMIZATION
 # Snapdragon optimization
 KBUILD_CFLAGS	+=  -mcpu=cortex-a73 -mtune=cortex-a73
 KBUILD_CFLAGS   +=  -march=armv8-a+fp+simd+crc+crypto 
 KBUILD_CFLAGS   +=  -mfpu=neon-fp-armv8 -mfloat-abi=hard
+endif # CONFIG_SNAPDRAGON_OPTIMIZATION
 
 # Inlin optimization
 ifdef CONFIG_INLINE_OPTIMIZATION
