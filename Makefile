@@ -689,6 +689,7 @@ include arch/$(SRCARCH)/Makefile
 
 ifdef CONFIG_LLVM_POLLY
 POLLY_FLAGS := -mllvm -polly \
+		-mllvm -polly-run-dce \
 		-mllvm -polly-invariant-load-hoisting \
 		-mllvm -polly-optimized-scops \
 		-mllvm -polly-vectorizer=stripmine \
