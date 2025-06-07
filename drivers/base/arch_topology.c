@@ -447,7 +447,9 @@ init_cpu_capacity_callback(struct notifier_block *nb,
 
 	if (cpumask_empty(cpus_to_visit)) {
 		topology_normalize_cpu_scale();
+#ifdef CONFIG_GENERIC_ARCH_TOPOLOGY
 		init_sched_energy_costs();
+#endif
 		if (topology_detect_flags())
 			schedule_work(&update_topology_flags_work);
 		free_raw_capacity();
