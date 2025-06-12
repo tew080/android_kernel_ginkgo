@@ -719,3 +719,97 @@ CONFIG_KPROBE_EVENT=n
 #######
 ## end of SukiSU-Ultra + SuSFS 1.5.5
 #######
+
+######
+# CASS (Capacity Aware Superset Scheduler)
+######
+CONFIG_SCHED_CASS=y
+######
+## end CASS (Capacity Aware Superset Scheduler)
+######
+
+#####
+## SCHED BORE 
+######
+CONFIG_SCHED_BORE=y
+######
+## end SCHED BORE 
+######
+
+######
+##  LZ4KD compression algorithm
+######
+CONFIG_ZRAM_DEFAULT_COMP_ALGORITHM="lz4"
+CONFIG_ZRAM_SIZE_OVERRIDE=4
+CONFIG_CRYPTO_LZ4KD=y
+CONFIG_LZ4KD_COMPRESS=y
+CONFIG_LZ4KD_DECOMPRESS=y
+######
+## end  LZ4KD compression algorithm
+######
+
+######
+## SBalance IRQ balancer
+######
+CONFIG_IRQ_SBALANCE=y
+CONFIG_IRQ_SBALANCE_POLL_MSEC=500
+CONFIG_IRQ_SBALANCE_THRESH=1024
+CONFIG_SBALANCE_EXCLUDE_CPUS=6,7
+######
+## end of  SBalance IRQ balancer
+######
+
+######
+# UClamp Scheduler tunables
+######
+CONFIG_UCLAMP_TASK=y
+CONFIG_UCLAMP_BUCKETS_COUNT=20
+CONFIG_UCLAMP_TASK_GROUP=y
+CONFIG_UCLAMP_ASSIST=y
+######
+## end UClamp Scheduler tunables
+######
+
+######
+# CPU INPUT BOOST Driver
+######
+CONFIG_CPU_INPUT_BOOST=y
+CONFIG_INPUT_BOOST_DURATION_MS=64
+CONFIG_WAKE_BOOST_DURATION_MS=1000
+CONFIG_INPUT_BOOST_FREQ_LP=1612800
+CONFIG_INPUT_BOOST_FREQ_PERF=1536000
+CONFIG_MAX_BOOST_FREQ_LP=1804800
+CONFIG_MAX_BOOST_FREQ_PERF=2016000
+CONFIG_MIN_FREQ_LP=864000
+CONFIG_MIN_FREQ_PERF=902400
+######
+## end CPU INPUT BOOST Driver
+######
+
+######
+# LRU (Least Recently Used memory management mechanism)
+######
+CONFIG_LRU_GEN=y
+CONFIG_LRU_GEN_ENABLED=y
+# CONFIG_LRU_GEN_STATS is not set
+######
+## end LRU (Least Recently Used memory management mechanism)
+######
+
+######
+## Sysctl knobs for protecting the working set
+######
+CONFIG_ANON_MIN_KBYTES=196608
+CONFIG_CLEAN_LOW_KBYTES=393216
+CONFIG_CLEAN_MIN_KBYTES=196608
+######
+## end of  Sysctl knobs for protecting the working set
+######
+
+######
+## Use entropy optimization for zram
+######
+CONFIG_ZRAM_ENTROPY=y
+######
+## end of Use entropy optimization for zram
+######
