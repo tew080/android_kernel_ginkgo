@@ -4,7 +4,7 @@
 # Copyright (C) 2020-2021 Adithya R.
 
 SECONDS=0 # builtin bash timer
-ZIPNAME="ERROR-VTHREE-ginkgo-KSU-Next+SuSFS-$(date '+%Y%m%d-%H%M').zip"
+ZIPNAME="ERROR-VTHREE-ginkgo-SukiSU-Ultra+SuSFS-$(date '+%Y%m%d-%H%M').zip"
 TC_DIR="/home/tew/kernel/Clang-20.0.0git-20250129"
 GCC_64_DIR="/home/tew/kernel/aarch64-linux-android-4.9"
 GCC_32_DIR="/home/tew/kernel/arm-linux-androideabi-4.9"
