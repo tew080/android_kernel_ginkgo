@@ -5,7 +5,7 @@
 
 SECONDS=0 # builtin bash timer
 ZIPNAME="ERROR-VTHREE-ginkgo-SukiSU-Ultra+SuSFS-$(date '+%Y%m%d-%H%M').zip"
-TC_DIR="/home/tew/kernel/Clang-20.0.0git-20250129"
+TC_DIR="/home/tew/kernel/clang-r547379"
 GCC_64_DIR="/home/tew/kernel/aarch64-linux-android-4.9"
 GCC_32_DIR="/home/tew/kernel/arm-linux-androideabi-4.9"
 DEFCONFIG="vendor/ginkgo-perf_defconfig"
