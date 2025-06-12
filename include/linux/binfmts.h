@@ -149,7 +149,7 @@ extern int do_execveat(int, struct filename *,
 		       const char __user * const __user *,
 		       int);
 
-static inline bool task_is_booster(struct task_struct *tsk)Add commentMore actions
+static inline bool task_is_booster(struct task_struct *tsk)
 {
 	char comm[sizeof(tsk->comm)];
 
