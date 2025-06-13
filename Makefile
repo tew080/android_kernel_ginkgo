@@ -710,39 +710,60 @@ KBUILD_CFLAGS	+= $(call cc-disable-warning, int-in-bool-context)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, address-of-packed-member)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, attribute-alias)
 
-ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
+ifdef CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE
+KBUILD_CFLAGS   += -O2
+else ifdef CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE_O3
+KBUILD_CFLAGS   += -O3 -ffp-contract=fast -ffast-math
+else ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS   += -Os
-else
-KBUILD_CFLAGS   += -O3
-ifeq ($(cc-name),clang)
-KBUILD_CFLAGS	+= -mcpu=cortex-a53 -mtune=cortex-a53
+endif # CONFIG_CC_OPTIMIZE_FOR_SIZE
+
+ifdef CONFIG_SNAPDRAGON_OPTIMIZATION
+# Snapdragon optimization
+KBUILD_CFLAGS	+=  -mcpu=kryo -mtune=kryo
+KBUILD_CFLAGS   +=  -march=armv8-a+fp+simd+crc+crypto 
+KBUILD_CFLAGS   +=  -mfpu=neon-fp-armv8 -mfloat-abi=hard
+endif # CONFIG_SNAPDRAGON_OPTIMIZATION
 
 ifdef CONFIG_LLVM_POLLY
-KBUILD_CFLAGS	+= -mllvm -polly \
-		   -mllvm -polly-run-inliner \
-		   -mllvm -polly-ast-use-context \
-		   -mllvm -polly-detect-keep-going \
-		   -mllvm -polly-invariant-load-hoisting \
-		   -mllvm -polly-vectorizer=stripmine \
-		   -mllvm -polly-loopfusion-greedy=1 \
-		   -mllvm -polly-reschedule=1 \
-		   -mllvm -polly-postopts=1 \
-		   -mllvm -polly-num-threads=0 \
-		   -mllvm -polly-omp-backend=LLVM \
-		   -mllvm -polly-scheduling=dynamic \
-		   -mllvm -polly-scheduling-chunksize=1
-
-# Polly may optimise loops with dead paths beyound what the linker
-# can understand. This may negate the effect of the linker's DCE
-# so we tell Polly to perfom proven DCE on the loops it optimises
-# in order to preserve the overall effect of the linker's DCE.
-ifdef CONFIG_LD_DEAD_CODE_DATA_ELIMINATION
-KBUILD_CFLAGS	+= -mllvm -polly-run-dce
-endif
+POLLY_FLAGS := -mllvm -polly \
+		-mllvm -polly-run-dce \
+		-mllvm -polly-invariant-load-hoisting \
+		-mllvm -polly-optimized-scops \
+		-mllvm -polly-vectorizer=stripmine \
+		-mllvm -polly-position=before-vectorizer \
+		-mllvm -polly-reschedule=1 \
+		-mllvm -polly-run-inliner \
+		-mllvm -polly-loopfusion-greedy=1 \
+		-mllvm -polly-num-threads=0 \
+		-mllvm -polly-detect-keep-going \
+		-mllvm -polly-ast-use-context \
+		-mllvm -polly-scheduling=dynamic 
+ 
+KBUILD_CFLAGS += $(POLLY_FLAGS)
+KBUILD_AFLAGS += $(POLLY_FLAGS)
+KBUILD_LDFLAGS += $(POLLY_FLAGS)
 endif # CONFIG_LLVM_POLLY
 
-endif # $(cc-name),clang
-endif # CONFIG_CC_OPTIMIZE_FOR_SIZE
+# Inlin optimization
+ifdef CONFIG_INLINE_OPTIMIZATION
+INLINE_FLAGS := -finline-functions \
+		-mllvm -inline-threshold=300 \
+		-mllvm -inlinehint-threshold=150 \
+		-mllvm -enable-pipeliner \
+		-mllvm -enable-loop-distribute \
+		-mllvm -enable-loopinterchange \
+		-mllvm -enable-loop-flatten \
+		-mllvm -enable-machine-outliner=never \
+		-mllvm -unroll-runtime \
+		-mllvm -unroll-count=4 \
+		-mllvm -unroll-threshold=900 \
+		-mllvm -unroll-partial-threshold=900
+
+KBUILD_CFLAGS += $(INLINE_FLAGS)
+KBUILD_AFLAGS += $(INLINE_FLAGS)
+KBUILD_LDFLAGS += $(INLINE_FLAGS)
+endif # CONFIG_INLINE_OPTIMIZATION
 
 # Tell gcc to never replace conditional load with a non-conditional one
 KBUILD_CFLAGS	+= $(call cc-option,--param=allow-store-data-races=0)
@@ -904,14 +925,18 @@ endif
 ifdef CONFIG_LTO_CLANG
 ifdef CONFIG_THINLTO
 lto-clang-flags	:= -flto=thin
+ifeq ($(ld-name),lld)
 LDFLAGS		+= --thinlto-cache-dir=.thinlto-cache
+else
+LDFLAGS		+= --plugin-opt=cache-dir=.thinlto-cache
+endif
 else
 lto-clang-flags	:= -flto
 endif
 lto-clang-flags += -fvisibility=default $(call cc-option, -fsplit-lto-unit)
 
 # Limit inlining across translation units to reduce binary size
-LD_FLAGS_LTO_CLANG := -mllvm -import-instr-limit=5
+LD_FLAGS_LTO_CLANG := --plugin-opt=-import-instr-limit=5 --plugin-opt=O3 --lto-O3
 
 KBUILD_LDFLAGS += $(LD_FLAGS_LTO_CLANG)
 KBUILD_LDFLAGS_MODULE += $(LD_FLAGS_LTO_CLANG)
@@ -921,15 +946,15 @@ KBUILD_LDFLAGS_MODULE += -T scripts/module-lto.lds
 # allow disabling only clang LTO where needed
 DISABLE_LTO_CLANG := -fno-lto
 export DISABLE_LTO_CLANG
-endif
 
-ifdef CONFIG_LTO
 LTO_CFLAGS	:= $(lto-clang-flags)
 KBUILD_CFLAGS	+= $(LTO_CFLAGS)
 
 DISABLE_LTO	:= $(DISABLE_LTO_CLANG)
 export LTO_CFLAGS DISABLE_LTO
+endif
 
+ifdef CONFIG_LTO
 # LDFINAL_vmlinux and LDFLAGS_FINAL_vmlinux can be set to override
 # the linker and flags for vmlinux_link.
 export LDFINAL_vmlinux LDFLAGS_FINAL_vmlinux

@@ -114,6 +114,21 @@ config LOCALVERSION_AUTO
 
 	  which is done within the script "scripts/setlocalversion".)
 
+config INLINE_OPTIMIZATION
+	bool "Optimize compiler inlining"
+	default n
+	help
+	  Inlining functions in the hot-path can help improve performance,
+	  while also increasing the final size of the kernel image. Setting
+	  this option informs the compiler to optimize inlining. Whether to
+	  inline for performance or reduced size is controlled via the
+	  optimize for size (CC_OPTIMIZE_FOR_SIZE) or optimize for
+	  performance (CC_OPTIMIZE_FOR_PERFORMANCE) configs.
+
+config SNAPDRAGON_OPTIMIZATION
+	bool "Optimize compiler Snapdragon Flag"
+	default n
+
 config HAVE_KERNEL_GZIP
 	bool
 
@@ -1373,16 +1388,22 @@ choice
 	default CC_OPTIMIZE_FOR_PERFORMANCE
 
 config CC_OPTIMIZE_FOR_PERFORMANCE
-	bool "Optimize for performance"
+	bool "Optimize for performance (-O2)"
 	help
 	  This is the default optimization level for the kernel, building
 	  with the "-O2" compiler flag for best performance and most
 	  helpful compile-time warnings.
 
-config CC_OPTIMIZE_FOR_SIZE
-	bool "Optimize for size"
+config CC_OPTIMIZE_FOR_PERFORMANCE_O3
+	bool "Optimize more for performance (-O3)"
 	help
-	  Enabling this option will pass "-Os" instead of "-O2" to
+	  Choosing this option will pass "-O3" to your compiler to optimize
+	  the kernel yet more for performance.
+
+config CC_OPTIMIZE_FOR_SIZE
+	bool "Optimize for size (-Os)"
+	help
+	  Enabling this option will pass "-Os" instead of "-O2" or "-O3" to
 	  your compiler resulting in a smaller kernel.
 
 	  If unsure, say N.
